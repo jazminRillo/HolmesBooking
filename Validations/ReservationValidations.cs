@@ -20,13 +20,13 @@ public class ReservationValidations
         return true;
     }
 
-    public static bool IsPresent(List<Reservation> reservations, int Id)
+    public static bool IsPresent(List<Reservation> reservations, Guid Id)
     {
         Reservation? r = reservations.Find(x => x.Id == Id);
         return r != null;
     }
 
-    public static Reservation GetReservation(List<Reservation> reservations, int Id)
+    public static Reservation GetReservation(List<Reservation> reservations, Guid Id)
     {
         return reservations.Find(x => x.Id == Id)!;
     }

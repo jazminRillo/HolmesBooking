@@ -40,11 +40,11 @@ public class CustomersController : Controller
             }
             else
             {
-                if (CustomerValidations.IsPresent(_customerMocks.Customers, customer.Id))
+                if (CustomerValidations.IsPresent(_customerMocks.Customers, customer.Id!.Value))
                 {
                     if (CustomerValidations.IsValid(_customerMocks.Customers, customer))
                     {
-                        Customer aux = CustomerValidations.GetCustomer(_customerMocks.Customers, customer.Id);
+                        Customer aux = CustomerValidations.GetCustomer(_customerMocks.Customers, customer.Id!.Value);
 
                         aux.Name = customer.Name;
                         aux.Lastname = customer.Lastname;

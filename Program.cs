@@ -12,6 +12,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 builder.Services.AddSingleton<ServiceMocks>();
 builder.Services.AddSingleton<CustomerMocks>();
+builder.Services.AddSingleton<ReservationMocks>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
@@ -57,6 +58,11 @@ app.UseEndpoints(endpoints =>
         name: "customers",
         pattern: "customers/{action=Index}/{id?}",
         defaults: new { controller = "Customers" });
+
+    endpoints.MapControllerRoute(
+        name: "reservations",
+        pattern: "reservations/{action=Index}/{id?}",
+        defaults: new { controller = "Reservations" });
 
     endpoints.MapControllerRoute(
         name: "default",

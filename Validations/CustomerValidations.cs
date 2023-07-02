@@ -12,7 +12,7 @@ public class CustomerValidations
 
     public static bool IsNewCustomer(Customer c)
     {
-        return c.Id == Guid.Empty;
+        return c.Id == null;
     }
 
     public static bool IsPresent(List<Customer> customers, Guid Id)

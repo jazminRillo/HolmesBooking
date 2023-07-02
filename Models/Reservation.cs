@@ -2,7 +2,7 @@ namespace HolmesBooking;
 
 public class Reservation
 {
-    public int? Id { get; set; }
+    public Guid? Id { get; set; }
     public Customer? Customer { get; set; }
     public Service? Service { get; set; }
     public DateTime? Time { get; set; }
@@ -14,7 +14,7 @@ public class Reservation
     {
     }
 
-    public Reservation(int Id, Customer Customer, Service Service, DateTime Time, State State, int NumberDiners, string Note)
+    public Reservation(Guid? Id, Customer Customer, Service Service, DateTime Time, State State, int NumberDiners, string Note)
     {
         this.Id = Id;
         this.Customer = Customer;

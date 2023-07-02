@@ -2,7 +2,7 @@ namespace HolmesBooking;
 
 public class Customer
 {
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
     public string? Name { get; set; }
     public string? Lastname { get; set; }
     public string? Email { get; set; }
@@ -13,7 +13,7 @@ public class Customer
     {
     }
 
-    public Customer(Guid Id, string Name, string Lastname, string Email, string PhoneNumber, Classification Classification)
+    public Customer(Guid? Id, string Name, string Lastname, string Email, string PhoneNumber, Classification Classification)
     {
         this.Id = Id;
         this.Name = Name;

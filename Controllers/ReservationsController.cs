@@ -5,16 +5,16 @@ using Microsoft.AspNetCore.Mvc;
 namespace HolmesBooking.Controllers;
 
 [ApiController]
-[Route("[reservations]")]
+[Route("reservations")]
 public class ReservationsController : Controller
 {
     private readonly ILogger<ServicesController> _logger;
-    private ReservationMocks rm;
+    private ReservationMocks _reservationMocks;
 
-    public ReservationsController(ILogger<ServicesController> logger)
+    public ReservationsController(ILogger<ServicesController> logger, ReservationMocks reservationMocks)
     {
         _logger = logger;
-        rm = new ReservationMocks(new CustomerMocks(), new ServiceMocks());
+        _reservationMocks = reservationMocks;
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
@@ -35,9 +35,9 @@ public class ReservationsController : Controller
                     // Database.save(reservation)
 
                     // I did this to test the endpoint by console:
-                    rm.Reservations!.Add(reservation);
+                    _reservationMocks.Reservations!.Add(reservation);
                     Console.WriteLine("Reserva recibida.");
-                    foreach (var aux in rm.Reservations)
+                    foreach (var aux in _reservationMocks.Reservations!)
                     {
                         Console.WriteLine("Id: " + aux.Id + " Nota: " + aux.Note);
                     }
@@ -50,11 +50,11 @@ public class ReservationsController : Controller
             }
             else
             {
-                if (ReservationValidations.IsPresent(rm.Reservations!, (int)reservation.Id!))
+                if (ReservationValidations.IsPresent(_reservationMocks.Reservations!, reservation.Id!.Value))
                 {
                     if (ReservationValidations.IsValid(reservation))
                     {
-                        Reservation aux = ReservationValidations.GetReservation(rm.Reservations!, (int)reservation.Id);
+                        Reservation aux = ReservationValidations.GetReservation(_reservationMocks.Reservations!, reservation.Id!.Value);
 
                         aux.Customer = reservation.Customer;
                         aux.Service = reservation.Service;
@@ -76,7 +76,7 @@ public class ReservationsController : Controller
                 }
             }
         }
-        catch (System.Exception)
+        catch (Exception)
         {
             throw;
             // Handle error related with DB (?).
@@ -86,15 +86,58 @@ public class ReservationsController : Controller
     // This endpoint works but it is not updated when you post a new reservation.
     [EnableCors("_myAllowSpecificOrigins")]
     [HttpGet("/all-reservations", Name = "GetAllReservations")]
-    public List<Reservation>? GetAllReservations()
+    public List<Reservation> GetAllReservations()
     {
         try
         {
-            return rm.Reservations;
+            return _reservationMocks.Reservations!;
         }
         catch (Exception)
         {
             throw;
         }
+    }
+
+    public IActionResult ShowAllReservations()
+    {
+        List<Reservation> reservations = GetAllReservations();
+        return View("AllReservations", reservations);
+    }
+
+    [HttpGet("edit-reservation/{id}", Name = "EditReservation")]
+    public IActionResult EditReservation(Guid id)
+    {
+        Reservation reservation = GetReservationById(id);
+
+        if (reservation == null)
+        {
+            return NotFound();
+        }
+
+        return View("EditReservation", reservation);
+    }
+
+    [HttpGet("get-reservation/{reservationId}", Name = "GetReservationById")]
+    public Reservation GetReservationById(Guid reservationId)
+    {
+        try
+        {
+            return _reservationMocks.Reservations!.Find(x => x.Id == reservationId)!;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    [HttpPost("update-reservation", Name = "UpdateReservation")]
+    public IActionResult UpdateService(Reservation reservation)
+    {
+        if (ModelState.IsValid)
+        {
+            return RedirectToAction("Index");
+        }
+
+        return View("EditReservation", reservation);
     }
 }
