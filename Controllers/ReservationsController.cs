@@ -6,7 +6,7 @@ namespace HolmesBooking.Controllers;
 
 [ApiController]
 [Route("[reservations]")]
-public class ReservationsController : ControllerBase
+public class ReservationsController : Controller
 {
     private readonly ILogger<ServicesController> _logger;
     private ReservationMocks rm;
@@ -19,7 +19,7 @@ public class ReservationsController : ControllerBase
 
     [EnableCors("_myAllowSpecificOrigins")]
     [HttpPost("/new-reservation", Name = "CreateReservation")]
-    public IActionResult CreateReservation([FromBody] Reservation? reservation)
+    public IActionResult CreateReservation([FromBody] Reservation reservation)
     {
         try
         {
@@ -35,7 +35,7 @@ public class ReservationsController : ControllerBase
                     // Database.save(reservation)
 
                     // I did this to test the endpoint by console:
-                    rm.Reservations.Add(reservation);
+                    rm.Reservations!.Add(reservation);
                     Console.WriteLine("Reserva recibida.");
                     foreach (var aux in rm.Reservations)
                     {
@@ -50,11 +50,11 @@ public class ReservationsController : ControllerBase
             }
             else
             {
-                if (ReservationValidations.IsPresent(rm.Reservations, (int)reservation.Id))
+                if (ReservationValidations.IsPresent(rm.Reservations!, (int)reservation.Id!))
                 {
                     if (ReservationValidations.IsValid(reservation))
                     {
-                        Reservation aux = ReservationValidations.GetReservation(rm.Reservations, (int)reservation.Id);
+                        Reservation aux = ReservationValidations.GetReservation(rm.Reservations!, (int)reservation.Id);
 
                         aux.Customer = reservation.Customer;
                         aux.Service = reservation.Service;
@@ -92,7 +92,7 @@ public class ReservationsController : ControllerBase
         {
             return rm.Reservations;
         }
-        catch (System.Exception)
+        catch (Exception)
         {
             throw;
         }

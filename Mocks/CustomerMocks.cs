@@ -7,11 +7,11 @@ public class CustomerMocks
     public CustomerMocks()
     {
         Customers = new List<Customer> {
-        new Customer(0, "nombre", "apellido", "usuario@mail.com", "123456789", Classification.Bronce),
-        new Customer(1, "nombre", "apellido", "usuario@mail.com", "123456789", Classification.Plata),
-        new Customer(2, "nombre", "apellido", "usuario@mail.com", "123456789", Classification.Oro),
-        new Customer(3, "nombre", "apellido", "usuario@mail.com", "123456789", Classification.Platino),
-        new Customer(4, "nombre", "apellido", "usuario@mail.com", "123456789", Classification.Bronce),
+        new Customer(Guid.NewGuid(), "nombre", "apellido", "usuario@mail.com", "123456789", Classification.Bronce),
+        new Customer(Guid.NewGuid(), "nombre", "apellido", "usuario@mail.com", "123456789", Classification.Plata),
+        new Customer(Guid.NewGuid(), "nombre", "apellido", "usuario@mail.com", "123456789", Classification.Oro),
+        new Customer(Guid.NewGuid(), "nombre", "apellido", "usuario@mail.com", "123456789", Classification.Platino),
+        new Customer(Guid.NewGuid(), "nombre", "apellido", "usuario@mail.com", "123456789", Classification.Bronce),
         };
     }
 }

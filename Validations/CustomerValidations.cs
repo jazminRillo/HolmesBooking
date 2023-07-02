@@ -12,18 +12,18 @@ public class CustomerValidations
 
     public static bool IsNewCustomer(Customer c)
     {
-        return c.Id == null;
+        return c.Id == Guid.Empty;
     }
 
-    public static bool IsPresent(List<Customer> customers, int Id)
+    public static bool IsPresent(List<Customer> customers, Guid Id)
     {
         Customer? c = customers.Find(x => x.Id == Id);
         return c != null;
     }
 
-    public static Customer GetCustomer(List<Customer> customers, int Id)
+    public static Customer GetCustomer(List<Customer> customers, Guid Id)
     {
-        return customers.Find(x => x.Id == Id);
+        return customers.Find(x => x.Id == Id)!;
     }
 
     public static bool IsValid(List<Customer> customers, Customer c)
@@ -33,7 +33,7 @@ public class CustomerValidations
             return false;
         }
 
-        if (customers.Any(x => x.Email.Equals(c.Email)))
+        if (customers.Any(x => x.Email!.Equals(c.Email)))
         {
             return false;
         }
@@ -43,7 +43,7 @@ public class CustomerValidations
             return false;
         }
 
-        if (!IsPhoneNumberValid(c.PhoneNumber))
+        if (!IsPhoneNumberValid(c.PhoneNumber!))
         {
             return false;
         }

@@ -1,0 +1,27 @@
+﻿@model List<Customer>
+
+<h2>Clientes</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var customer in Model)
+        {
+            <tr>
+                <td>@customer.Name</td>
+                <td>
+                    <a href="@Url.Action("EditCustomer", "Customers", new { id = customer.Id })">Edit</a>
+                    <a asp-action="DeleteCustomer" asp-route-id="@customer.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="CreateCustomer">Create New Customer</a>
+

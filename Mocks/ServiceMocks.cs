@@ -7,6 +7,10 @@ public class ServiceMocks
     public Schedule DaySchedule { get; set; }
     public Schedule NightSchedule { get; set; }
     public List<Service> AvailableServices { get; set; }
+    Guid Visita_Guiada_randomId = Guid.NewGuid();
+    Guid Visita_Guiada_Almuerzo_randomId = Guid.NewGuid();
+    Guid Almuerzo_randomId = Guid.NewGuid();
+    Guid Cena_randomId = Guid.NewGuid();
 
     public ServiceMocks()
     {
@@ -43,6 +47,7 @@ public class ServiceMocks
         NightSchedule.AddSchedule(DayOfWeek.domingo, NightTime);
 
         Service Visita_Guiada = new Service(
+            Visita_Guiada_randomId,
             "Visita Guiada",
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 1),
@@ -52,6 +57,7 @@ public class ServiceMocks
         );
 
         Service Visita_Guiada_Almuerzo = new Service(
+            Visita_Guiada_Almuerzo_randomId,
             "Visita Guiada con Almuerzo",
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 1),
@@ -61,6 +67,7 @@ public class ServiceMocks
         );
 
         Service Almuerzo = new Service(
+           Almuerzo_randomId,
            "Almuerzo",
            new DateTime(2023, 3, 1),
            new DateTime(2023, 9, 1),
@@ -70,6 +77,7 @@ public class ServiceMocks
         );
 
         Service Cena = new Service(
+           Cena_randomId,
            "Cena",
            new DateTime(2023, 9, 1),
            new DateTime(2024, 3, 1),

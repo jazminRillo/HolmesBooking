@@ -5,13 +5,16 @@ using Microsoft.AspNetCore.Mvc;
 namespace HolmesBooking.Controllers;
 
 [ApiController]
-[Route("[services]")]
-public class ServicesController : ControllerBase
+[Route("services")]
+public class ServicesController : Controller
 {
     private readonly ILogger<ServicesController> _logger;
-    public ServicesController(ILogger<ServicesController> logger)
+    private readonly ServiceMocks _serviceMocks;
+
+    public ServicesController(ILogger<ServicesController> logger, ServiceMocks serviceMocks)
     {
         _logger = logger;
+        _serviceMocks = serviceMocks;
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
@@ -24,12 +27,11 @@ public class ServicesController : ControllerBase
             DayOfWeek Day = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), culture.DateTimeFormat.GetDayName(Date.DayOfWeek));
 
             List<Service> Response = new List<Service>();
-            ServiceMocks serviceMocks = new ServiceMocks();
 
-            foreach (var service in serviceMocks.AvailableServices)
+            foreach (var service in _serviceMocks.AvailableServices)
             {
                 bool IsInRange = (Date >= service.StartDate) && (Date <= service.EndDate);
-                bool IsValid = (service.Schedule.schedule.ContainsKey(Day)) && (Date >= DateTime.Today);
+                bool IsValid = (service.Schedule!.schedule.ContainsKey(Day)) && (Date >= DateTime.Today);
 
                 if (service.IsActive && IsInRange && IsValid)
                 {
@@ -39,7 +41,7 @@ public class ServicesController : ControllerBase
 
             return Response;
         }
-        catch (System.Exception)
+        catch (Exception)
         {
             throw;
         }
@@ -47,16 +49,67 @@ public class ServicesController : ControllerBase
 
     [EnableCors("_myAllowSpecificOrigins")]
     [HttpGet("/all-services", Name = "GetAllServices")]
-    public List<Service>? GetAllServices()
+    public List<Service> GetAllServices()
     {
         try
         {
-            ServiceMocks serviceMocks = new ServiceMocks();
-            return serviceMocks.AvailableServices;
+            return _serviceMocks.AvailableServices;
         }
-        catch (System.Exception)
+        catch (Exception)
         {
             throw;
         }
     }
+
+    [HttpPost("/add-schedule", Name = "AddSchedule")]
+    public IActionResult AddSchedule(int serviceId, [FromBody] Schedule schedule)
+    {
+        return Ok();
+    }
+
+    public IActionResult ShowAllServices()
+    {
+        List<Service> services = GetAllServices();
+        return View("AllServices", services);
+    }
+
+    [HttpGet("edit-service/{id}", Name = "EditService")]
+    public IActionResult EditService(Guid id)
+    {
+        // Obtener el servicio de la base de datos u otra fuente de datos según el "id"
+        Service service = GetServiceById(id);
+
+        if (service == null)
+        {
+            return NotFound();
+        }
+
+        return View("EditService", service);
+    }
+
+    [HttpGet("get-service/{serviceId}", Name = "GetServiceById")]
+    public Service GetServiceById(Guid serviceId)
+    {
+        try
+        {
+            return _serviceMocks.AvailableServices.Find(x => x.Id == serviceId)!;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    [HttpPost("update-service", Name = "UpdateService")]
+    public IActionResult UpdateService(Service service)
+    {
+        if (ModelState.IsValid)
+        {
+            return RedirectToAction("Index");
+        }
+
+        return View("EditService", service);
+    }
+
+
 }

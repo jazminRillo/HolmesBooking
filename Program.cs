@@ -1,4 +1,5 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using HolmesBooking;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,8 +9,11 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Sistema de Reservas API", Version = "v1" });
 });
-
+builder.Services.AddSingleton<ServiceMocks>();
+builder.Services.AddSingleton<CustomerMocks>();
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -32,9 +36,23 @@ app.UseRouting();
 app.UseCors();
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "services",
+        pattern: "services/{action=Index}/{id?}",
+        defaults: new { controller = "Services" });
+
+    endpoints.MapControllerRoute(
+        name: "customers",
+        pattern: "customers/{action=Index}/{id?}",
+        defaults: new { controller = "Customers" });
+
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
+});
+
 
 app.Run();
 

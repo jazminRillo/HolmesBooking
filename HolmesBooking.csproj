@@ -11,4 +11,12 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Views\Services\" />
+    <None Remove="Views\Customers\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Views\Services\" />
+    <Folder Include="Views\Customers\" />
+  </ItemGroup>
 </Project>

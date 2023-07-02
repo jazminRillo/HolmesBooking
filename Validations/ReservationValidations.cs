@@ -28,6 +28,6 @@ public class ReservationValidations
 
     public static Reservation GetReservation(List<Reservation> reservations, int Id)
     {
-        return reservations.Find(x => x.Id == Id);
+        return reservations.Find(x => x.Id == Id)!;
     }
 }
