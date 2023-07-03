@@ -8,13 +8,14 @@ public class Service
     public DateTime? EndDate { get; set; }
     public bool IsActive { get; set; }
     public int? MaxPeople { get; set; }
-    public Schedule? Schedule { get; set; }
+    public Dictionary<DayOfWeek, List<TimeSpan>> Schedule { get; set; }
 
     public Service()
     {
+        Schedule = new Dictionary<DayOfWeek, List<TimeSpan>>();
     }
 
-    public Service(Guid Id, string Name, DateTime StartDate, DateTime EndDate, bool IsActive, int MaxPeople, Schedule Schedule)
+    public Service(Guid Id, string Name, DateTime StartDate, DateTime EndDate, bool IsActive, int MaxPeople, Dictionary<DayOfWeek, List<TimeSpan>> Schedule)
     {
         this.Id = Id;
         this.Name = Name;
@@ -24,7 +25,4 @@ public class Service
         this.MaxPeople = MaxPeople;
         this.Schedule = Schedule;
     }
-
-
-
 }

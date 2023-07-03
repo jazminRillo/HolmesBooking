@@ -4,19 +4,19 @@ namespace HolmesBooking;
 
 public class Schedule
 {
-    public Dictionary<DayOfWeek, List<ScheduleTime>> schedule { get; set; }
+    public Dictionary<DayOfWeek, List<TimeSpan>> schedule { get; set; }
 
     public Schedule()
     {
-        schedule = new Dictionary<DayOfWeek, List<ScheduleTime>>();
+        schedule = new Dictionary<DayOfWeek, List<TimeSpan>>();
     }
 
-    public void AddSchedule(DayOfWeek DayOfWeek, List<ScheduleTime> scheduleTimes)
+    public void AddSchedule(DayOfWeek DayOfWeek, List<TimeSpan> scheduleTimes)
     {
         schedule[DayOfWeek] = scheduleTimes;
     }
 
-    public List<ScheduleTime> GetSchedule(DayOfWeek DayOfWeek)
+    public List<TimeSpan> GetSchedule(DayOfWeek DayOfWeek)
     {
         return schedule[DayOfWeek];
     }

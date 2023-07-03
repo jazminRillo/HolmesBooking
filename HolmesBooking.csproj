@@ -9,6 +9,9 @@
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
+    <PackageReference Include="jQuery" Version="3.7.0" />
+    <PackageReference Include="Syncfusion.EJ.AspNet.Core" Version="20.4.0.44" />
+    <PackageReference Include="Bootstrap.Datepicker" Version="1.8.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,5 +21,8 @@
   <ItemGroup>
     <Folder Include="Views\Services\" />
     <Folder Include="Views\Customers\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Remove="Views\Home\EditServiceOld.cshtml" />
   </ItemGroup>
 </Project>
