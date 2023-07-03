@@ -1,6 +1,8 @@
 using System.Globalization;
+using HolmesBooking.DataBase;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace HolmesBooking.Controllers;
 
@@ -8,11 +10,14 @@ namespace HolmesBooking.Controllers;
 [Route("services")]
 public class ServicesController : Controller
 {
+    private readonly HolmeBookingDbContext _dbContext;
+
     private readonly ILogger<ServicesController> _logger;
     private readonly ServiceMocks _serviceMocks;
 
-    public ServicesController(ILogger<ServicesController> logger, ServiceMocks serviceMocks)
+    public ServicesController(HolmeBookingDbContext dbContext, ILogger<ServicesController> logger, ServiceMocks serviceMocks)
     {
+        _dbContext = dbContext;
         _logger = logger;
         _serviceMocks = serviceMocks;
     }

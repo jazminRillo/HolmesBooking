@@ -1,10 +1,18 @@
 ﻿using HolmesBooking;
+using HolmesBooking.DataBase;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-// Add services to the container.
+// Obtener la configuración de la aplicación
+var configuration = new ConfigurationBuilder()
+    .SetBasePath(builder.Environment.ContentRootPath)
+    .AddJsonFile("appsettings.json")
+    .Build();
+
+// Agregar servicios a contenedor
 builder.Services.AddControllersWithViews();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -22,8 +30,21 @@ builder.Services.AddCors(options =>
                                               "http://localhost:3000").AllowAnyHeader();
                       });
 });
+
+string connectionString = configuration.GetConnectionString("DefaultConnection");
+
+// Configurar la conexión a la base de datos
+builder.Services.AddDbContext<HolmeBookingDbContext>(options =>
+    options.UseSqlServer(connectionString));
 var app = builder.Build();
 
+// ...
+
+// Configurar el middleware de enrutamiento y otros middleware
+
+// ...
+
+app.Run();
 
 
 // Configure the HTTP request pipeline.
