@@ -1,8 +1,10 @@
+using System;
 using System.Globalization;
 using HolmesBooking.DataBase;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace HolmesBooking.Controllers;
 
@@ -106,15 +108,67 @@ public class ServicesController : Controller
     }
 
     [HttpPost("update-service", Name = "UpdateService")]
-    public IActionResult UpdateService(Service service)
+    public IActionResult UpdateService([FromForm] Service service)
     {
         if (ModelState.IsValid)
         {
-            return RedirectToAction("Index");
+            // Actualizar los datos del servicio en la base de datos
+            var existingService = _dbContext.Services.Find(service.Id);
+            if (existingService != null)
+            {
+                existingService.Name = service.Name;
+                existingService.StartDate = service.StartDate;
+                existingService.EndDate = service.EndDate;
+                existingService.IsActive = service.IsActive;
+                existingService.MaxPeople = service.MaxPeople;
+
+                // Guardar los cambios en la base de datos
+                _dbContext.SaveChanges();
+            }
+
+            // Redirigir a la acción "ShowAllServices"
+            return RedirectToAction("ShowAllServices");
         }
 
+        // El modelo no es válido, regresar la vista "EditService" con los errores de validación
         return View("EditService", service);
     }
 
+    [HttpGet("create-new-service", Name = "CreateNewService")]
+    public IActionResult CreateNewService()
+    {
+        return View("CreateService", new Service());
+    }
 
+    [HttpPost("create-service", Name = "CreateService")]
+    public IActionResult CreateService([FromForm] Service service)
+    {
+        if (ModelState.IsValid)
+        {
+            var DayTime = new List<TimeSpan>()
+        {
+            new TimeSpan(13, 00, 00),
+            new TimeSpan(13, 30, 00),
+            new TimeSpan(14, 00, 00),
+            new TimeSpan(14, 30, 00),
+            new TimeSpan(15, 00, 00),
+            new TimeSpan(15, 30, 00),
+            new TimeSpan(16, 00, 00),
+
+        };
+            var DaySchedule = new Dictionary<DayOfWeek, List<TimeSpan>>
+            {
+            { DayOfWeek.sábado, DayTime },
+            { DayOfWeek.domingo, DayTime }
+        };
+            service.Schedule = DaySchedule;
+            _dbContext.Services.Add(service);
+            _dbContext.SaveChanges();
+
+            return RedirectToAction("ShowAllServices");
+        }
+
+        // Si el modelo no es válido, vuelve a la vista de creación con los errores de validación
+        return View("CreateService", service);
+    }
 }

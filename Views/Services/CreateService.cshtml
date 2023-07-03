@@ -1,0 +1,17 @@
+﻿@model Service
+
+<h2>Crear nuevo servicio</h2>
+
+<form asp-action="CreateService" method="post">
+    <div class="form-group">
+        <label asp-for="Name" class="form-label">Nombre del Servicio</label>
+        <input class="form-control" asp-for="Name" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <!-- Agrega otros campos del servicio aquí -->
+
+    <button type="submit" class="btn btn-primary">Crear Servicio</button>
+</form>
+
+

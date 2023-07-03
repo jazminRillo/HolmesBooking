@@ -31,20 +31,12 @@ builder.Services.AddCors(options =>
                       });
 });
 
-string connectionString = configuration.GetConnectionString("DefaultConnection");
+string connectionString = configuration.GetConnectionString("DefaultConnection")!;
 
 // Configurar la conexión a la base de datos
 builder.Services.AddDbContext<HolmeBookingDbContext>(options =>
     options.UseSqlServer(connectionString));
 var app = builder.Build();
-
-// ...
-
-// Configurar el middleware de enrutamiento y otros middleware
-
-// ...
-
-app.Run();
 
 
 // Configure the HTTP request pipeline.

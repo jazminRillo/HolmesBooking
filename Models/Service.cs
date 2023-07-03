@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace HolmesBooking;
 
 public class Service
@@ -8,6 +11,8 @@ public class Service
     public DateTime? EndDate { get; set; }
     public bool IsActive { get; set; }
     public int? MaxPeople { get; set; }
+
+    [NotMapped]
     public Dictionary<DayOfWeek, List<TimeSpan>> Schedule { get; set; }
 
     public Service()

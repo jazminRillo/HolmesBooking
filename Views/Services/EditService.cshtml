@@ -2,7 +2,8 @@
 
 <h2>Editar Servicio</h2>
 
-<form asp-action="UpdateService" method="post">
+<form asp-action="UpdateService" method="post" enctype="multipart/form-data">
+
     <input type="hidden" asp-for="Id" />
 
     <div class="form-group">
@@ -81,6 +82,11 @@
             $("#startDatePicker, #endDatePicker").datepicker({
                 format: "dd/mm/yyyy",
                 autoclose: true
+            });
+
+            $("form").submit(function () {
+                // Mostrar una confirmación antes de enviar el formulario
+                return confirm("¿Estás seguro de que deseas guardar los cambios?");
             });
         });</script>
     <style>

@@ -6,7 +6,6 @@
     <thead>
         <tr>
             <th>Service Name</th>
-            <th>Service Id</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -15,7 +14,6 @@
         {
             <tr>
                 <td>@service.Name</td>
-                <td>@service.Id</td>
                 <td>
                     <a href="@Url.Action("EditService", "Services", new { id = service.Id })">Edit</a>
                     <a asp-action="DeleteService" asp-route-id="@service.Id">Delete</a>
@@ -25,7 +23,7 @@
     </tbody>
 </table>
 
-<a asp-action="CreateService">Create New Service</a>
+<a asp-action="CreateNewService">Crear nuevo servicio</a>
 
 
 
