@@ -1,3 +1,4 @@
+using HolmesBooking.DataBase;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,16 +9,22 @@ namespace HolmesBooking.Controllers;
 public class CustomersController : Controller
 {
     private readonly ILogger<CustomersController> _logger;
-    private readonly CustomerMocks _customerMocks;
-    public CustomersController(ILogger<CustomersController> logger, CustomerMocks customerMocks)
+    private readonly HolmeBookingDbContext _dbContext;
+    public CustomersController(ILogger<CustomersController> logger, HolmeBookingDbContext dbContext)
     {
         _logger = logger;
-        _customerMocks = customerMocks;
+        _dbContext = dbContext;
+    }
+
+    [HttpGet("create-new-customer", Name = "CreateCustomer")]
+    public IActionResult CreateCustomer()
+    {
+        return View("CreateCustomer", new Customer());
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
-    [HttpPost("/new-customer", Name = "CreateCustomer")]
-    public IActionResult CreateCustomer([FromBody] Customer customer)
+    [HttpPost("/save-customer", Name = "SaveCustomer")]
+    public IActionResult SaveCustomer([FromForm] Customer customer)
     {
         try
         {
@@ -28,10 +35,11 @@ public class CustomersController : Controller
 
             if (CustomerValidations.IsNewCustomer(customer))
             {
-                if (CustomerValidations.IsValid(_customerMocks.Customers, customer))
+                if (CustomerValidations.IsValid(_dbContext.Customers.ToList(), customer))
                 {
-                    // Database.save(reservation)
-                    return Ok("Cliente creado con éxito!");
+                    _dbContext.Customers.Add(customer);
+                    _dbContext.SaveChanges();
+                    return View("AllCustomers", _dbContext.Customers.ToList());
                 }
                 else
                 {
@@ -40,32 +48,37 @@ public class CustomersController : Controller
             }
             else
             {
-                if (CustomerValidations.IsPresent(_customerMocks.Customers, customer.Id!.Value))
+                var existingCustomer = _dbContext.Customers.Find(customer.Id);
+                if (existingCustomer != null)
                 {
-                    if (CustomerValidations.IsValid(_customerMocks.Customers, customer))
+                    existingCustomer.Name = customer.Name;
+                    existingCustomer.Lastname = customer.Lastname;
+                    existingCustomer.Email = customer.Email;
+                    existingCustomer.PhoneNumber = customer.PhoneNumber;
+                    _dbContext.SaveChanges();
+                }
+                return View("AllCustomers", _dbContext.Customers.ToList());
+                //revisar
+                /*if (CustomerValidations.IsValid(_dbContext.Customers.ToList(), customer)) 
+                {
+                    var existingCustomer = _dbContext.Customers.Find(customer.Id);
+                    if (existingCustomer != null)
                     {
-                        Customer aux = CustomerValidations.GetCustomer(_customerMocks.Customers, customer.Id!.Value);
-
-                        aux.Name = customer.Name;
-                        aux.Lastname = customer.Lastname;
-                        aux.Email = customer.Email;
-                        aux.PhoneNumber = customer.PhoneNumber;
-
-                        // Database.update(reservation)
-                        return Ok("Cliente con id " + customer.Id + " actualizado con éxito!");
+                        existingCustomer.Name = customer.Name;
+                        existingCustomer.Lastname = customer.Lastname;
+                        existingCustomer.Email = customer.Email;
+                        existingCustomer.PhoneNumber = customer.PhoneNumber;
+                        _dbContext.SaveChanges();
                     }
-                    else
-                    {
-                        return BadRequest("La información proporcionada para actualizar al cliente contiene algún error.");
-                    }
+                    return Ok("Cliente con id " + customer.Id + " actualizado con éxito!");
                 }
                 else
                 {
-                    return BadRequest("No se encontró el cliente solicitado.");
-                }
+                    return BadRequest("La información proporcionada para actualizar al cliente contiene algún error.");
+                }*/
             }
         }
-        catch (System.Exception)
+        catch (Exception)
         {
             throw;
             // Handle error related with DB (?).
@@ -78,7 +91,7 @@ public class CustomersController : Controller
     {
         try
         {
-            return _customerMocks.Customers;
+            return _dbContext.Customers.ToList();
         }
         catch (Exception)
         {
@@ -105,12 +118,12 @@ public class CustomersController : Controller
         return View("EditCustomer", customer);
     }
 
-    [HttpGet("get-customer/{customerId}", Name = "GetCustomerById")]
+    [HttpGet("get-customer/{id}", Name = "GetCustomerById")]
     public Customer GetCustomerById(Guid customerId)
     {
         try
         {
-            return _customerMocks.Customers.Find(x => x.Id == customerId)!;
+            return _dbContext.Customers.ToList().Find(x => x.Id == customerId)!;
         }
         catch (Exception)
         {

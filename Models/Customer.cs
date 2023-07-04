@@ -1,5 +1,8 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace HolmesBooking;
 
+[Table("Customer")]
 public class Customer
 {
     public Guid? Id { get; set; }
@@ -23,4 +26,15 @@ public class Customer
         this.Classification = Classification;
     }
 
+    public Classification GetClassification()
+    {
+        if (Classification.HasValue)
+        {
+            return Classification.Value;
+        }
+        else
+        {
+            return default;
+        }
+    }
 }

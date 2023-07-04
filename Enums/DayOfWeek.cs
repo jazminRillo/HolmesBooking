@@ -1,6 +1,6 @@
 namespace HolmesBooking;
 
-public enum DayOfWeek
+public enum DayOfWeekNotUsed
 {
     lunes,
     martes,

@@ -1,10 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using HolmesBooking.DataBase;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 
 namespace HolmesBooking.Controllers;
 
@@ -33,18 +32,17 @@ public class ServicesController : Controller
             CultureInfo culture = new CultureInfo("es-ES");
             DayOfWeek Day = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), culture.DateTimeFormat.GetDayName(Date.DayOfWeek));
 
-            List<Service> Response = new List<Service>();
+            List<Service> Response = new();
 
-            foreach (var service in _serviceMocks.AvailableServices)
-            {
-                bool IsInRange = (Date >= service.StartDate) && (Date <= service.EndDate);
-                bool IsValid = (service.Schedule!.ContainsKey(Day)) && (Date >= DateTime.Today);
+            var services = _dbContext.Services
+                .Where(service => service.IsActive && Date >= service.StartDate
+                    && Date <= service.EndDate
+                    && service.Schedule!.ContainsKey((int)Date.DayOfWeek)
+                    && Date >= DateTime.Today)
+                .ToList();
 
-                if (service.IsActive && IsInRange && IsValid)
-                {
-                    Response.Add(service);
-                }
-            }
+            Response.AddRange(services);
+
 
             return Response;
         }
@@ -56,11 +54,12 @@ public class ServicesController : Controller
 
     [EnableCors("_myAllowSpecificOrigins")]
     [HttpGet("/all-services", Name = "GetAllServices")]
-    public List<Service> GetAllServices()
+    public IActionResult GetAllServices()
     {
         try
         {
-            return _serviceMocks.AvailableServices;
+            List<Service> services = _dbContext.Services.ToList();
+            return Ok(services);
         }
         catch (Exception)
         {
@@ -76,14 +75,13 @@ public class ServicesController : Controller
 
     public IActionResult ShowAllServices()
     {
-        List<Service> services = GetAllServices();
+        List<Service> services = _dbContext.Services.ToList();
         return View("AllServices", services);
     }
 
     [HttpGet("edit-service/{id}", Name = "EditService")]
     public IActionResult EditService(Guid id)
     {
-        // Obtener el servicio de la base de datos u otra fuente de datos según el "id"
         Service service = GetServiceById(id);
 
         if (service == null)
@@ -99,7 +97,7 @@ public class ServicesController : Controller
     {
         try
         {
-            return _serviceMocks.AvailableServices.Find(x => x.Id == serviceId)!;
+            return _dbContext.Services.ToList().Find(x => x.Id == serviceId)!;
         }
         catch (Exception)
         {
@@ -108,11 +106,17 @@ public class ServicesController : Controller
     }
 
     [HttpPost("update-service", Name = "UpdateService")]
-    public IActionResult UpdateService([FromForm] Service service)
+    public IActionResult UpdateService([FromForm] Service service, [FromForm] string[] DeletedDays)
     {
         if (ModelState.IsValid)
         {
-            // Actualizar los datos del servicio en la base de datos
+            var deletedDayValues = DeletedDays.Select(d => (int)Enum.Parse<DayOfWeek>(d));
+
+            foreach (var day in deletedDayValues)
+            {
+                service.Schedule.Remove(day);
+            }
+
             var existingService = _dbContext.Services.Find(service.Id);
             if (existingService != null)
             {
@@ -121,12 +125,10 @@ public class ServicesController : Controller
                 existingService.EndDate = service.EndDate;
                 existingService.IsActive = service.IsActive;
                 existingService.MaxPeople = service.MaxPeople;
-
-                // Guardar los cambios en la base de datos
+                existingService.Schedule = service.Schedule;
                 _dbContext.SaveChanges();
             }
 
-            // Redirigir a la acción "ShowAllServices"
             return RedirectToAction("ShowAllServices");
         }
 
@@ -145,30 +147,12 @@ public class ServicesController : Controller
     {
         if (ModelState.IsValid)
         {
-            var DayTime = new List<TimeSpan>()
-        {
-            new TimeSpan(13, 00, 00),
-            new TimeSpan(13, 30, 00),
-            new TimeSpan(14, 00, 00),
-            new TimeSpan(14, 30, 00),
-            new TimeSpan(15, 00, 00),
-            new TimeSpan(15, 30, 00),
-            new TimeSpan(16, 00, 00),
-
-        };
-            var DaySchedule = new Dictionary<DayOfWeek, List<TimeSpan>>
-            {
-            { DayOfWeek.sábado, DayTime },
-            { DayOfWeek.domingo, DayTime }
-        };
-            service.Schedule = DaySchedule;
             _dbContext.Services.Add(service);
             _dbContext.SaveChanges();
 
             return RedirectToAction("ShowAllServices");
         }
 
-        // Si el modelo no es válido, vuelve a la vista de creación con los errores de validación
         return View("CreateService", service);
     }
 }

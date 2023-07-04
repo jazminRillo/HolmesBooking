@@ -19,14 +19,23 @@ namespace HolmesBooking.DataBase
             modelBuilder.Entity<Service>(entity =>
             {
                 entity.Property(s => s.Schedule)
-                    .HasColumnType("nvarchar(max)")
+                    .HasColumnType("jsonb")
                     .HasConversion(
                         schedule => JsonConvert.SerializeObject(schedule),
-                        json => JsonConvert.DeserializeObject<Dictionary<DayOfWeek, List<TimeSpan>>>(json)
+                        json => JsonConvert.DeserializeObject<Dictionary<int, List<TimeSpan>>>(json)
                     );
             });
+
+            modelBuilder.Entity<Customer>()
+                    .Property(c => c.Classification)
+                    .HasConversion(
+                        v => v.ToString(),  // Convertir el valor del Enum a cadena de texto
+                        v => (Classification)Enum.Parse(typeof(Classification), v)  // Convertir la cadena de texto al Enum correspondiente
+                    );
+
         }
-    }  
-        
-    
+
+    }
+
+
 }

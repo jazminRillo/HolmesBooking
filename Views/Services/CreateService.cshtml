@@ -9,9 +9,138 @@
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
 
-    <!-- Agrega otros campos del servicio aquí -->
+    <div class="form-group">
+        <label asp-for="StartDate" class="form-label">Fecha Inicio</label>
+        <input id="startDatePicker" class="form-control" asp-for="StartDate" />
+    </div>
 
-    <button type="submit" class="btn btn-primary">Crear Servicio</button>
+    <div class="form-group">
+        <label asp-for="EndDate" class="form-label">Fecha Fin</label>
+        <input id="endDatePicker" class="form-control" asp-for="EndDate" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="IsActive" class="form-label">Activo</label>
+        <input type="checkbox" class="form-check-input" asp-for="IsActive" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="MaxPeople" class="form-label">Cantidad máxima de reservas</label>
+        <input class="form-control" asp-for="MaxPeople" />
+    </div>
+
+    <div class="schedule-section">
+        <h4>Programación de servicio</h4>
+        @foreach (var day in Enum.GetValues(typeof(DayOfWeek)))
+        {
+            var dayOfWeek = (DayOfWeek)day;
+            var dayValue = (int)dayOfWeek;
+            var counter = 0;
+            <div class="form-group">
+                <label>@GetDayName(dayOfWeek)</label>
+                <div class="form-check">
+                    <input class="form-check-input schedule-checkbox" type="checkbox" id="check_@(dayOfWeek.ToString())" name="Schedule[@dayValue].@(counter).IsAvailable"
+                           value="true" @(Model.Schedule.ContainsKey(((int)dayOfWeek)) ? "checked" : "") />
+                    <label class="form-check-label" for="check_@(dayOfWeek.ToString())">Disponible</label>
+                </div>
+                <div class="form-group schedule-times" id="schedule_@(dayOfWeek.ToString())" style="@(Model.Schedule.ContainsKey(((int)dayOfWeek)) ? "display: block;" : "display: none;")">
+                    <div class="row">
+                        @foreach (var time in ScheduleTime.GetAvailableTimes())
+                        {
+                            <div class="col-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="time_@(dayOfWeek.ToString())_@(time.ToString("hhmm"))" name="Schedule[@dayValue][]"
+                                           value="@time.ToString("hh\\:mm")" @(Model.Schedule.ContainsKey(((int)dayOfWeek)) && Model.Schedule[((int)dayOfWeek)].Contains(time) ? "checked" : "") />
+                                    <label class="form-check-label" for="time_@(dayOfWeek.ToString())_@(time.ToString("hhmm"))">@time.ToString("hh\\:mm")</label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+
+
+    <button type="submit" class="btn btn-primary">Crear servicio</button>
 </form>
+@functions {
+    public string GetDayName(System.DayOfWeek dayOfWeek)
+    {
+        // Puedes personalizar este código para mostrar los nombres de los días en español
+        switch (dayOfWeek)
+        {
+            case System.DayOfWeek.Monday:
+                return "lunes";
+            case System.DayOfWeek.Tuesday:
+                return "martes";
+            case System.DayOfWeek.Wednesday:
+                return "miércoles";
+            case System.DayOfWeek.Thursday:
+                return "jueves";
+            case System.DayOfWeek.Friday:
+                return "viernes";
+            case System.DayOfWeek.Saturday:
+                return "sábado";
+            case System.DayOfWeek.Sunday:
+                return "domingo";
+            default:
+                return string.Empty;
+        }
+    }
+}
+@section Scripts {
+    <script>$(document).ready(function () {
+            $(".schedule-checkbox").change(function () {
+                var scheduleTimes = $(this).closest(".form-group").find(".schedule-times");
+                if ($(this).is(":checked")) {
+                    scheduleTimes.show();
+                } else {
+                    scheduleTimes.hide();
+                }
+            });
 
+            // Verificar el estado inicial de los checkboxes y mostrar/ocultar los horarios correspondientes
+            $(".schedule-checkbox:checked").each(function () {
+                $(this).closest(".form-group").find(".schedule-times").show();
+            });
+
+            // Inicializar datepicker con formato de fecha
+            $("#startDatePicker, #endDatePicker").datepicker({
+                format: "dd/mm/yyyy",
+                autoclose: true
+            });
+
+            $("form").submit(function () {
+                // Mostrar una confirmación antes de enviar el formulario
+                return confirm("¿Estás seguro de que deseas guardar los cambios?");
+            });
+        });</script>
+    <style>
+        .form-label {
+            font-weight: bold;
+            /* Aplica otros estilos visuales según tus preferencias */
+        }
+
+        .schedule-section {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+            /* Aplica otros estilos visuales según tus preferencias */
+        }
+
+        .schedule-times {
+            margin-top: 10px;
+        }
+
+            .schedule-times .row {
+                margin: 0;
+            }
+
+            .schedule-times .col-2 {
+                padding: 0;
+            }
+    </style>
+}
 

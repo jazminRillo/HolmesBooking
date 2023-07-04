@@ -4,8 +4,8 @@ public class ServiceMocks
 {
     public List<TimeSpan> DayTime { get; set; }
     public List<TimeSpan> NightTime { get; set; }
-    public Dictionary<DayOfWeek, List<TimeSpan>> DaySchedule { get; set; }
-    public Dictionary<DayOfWeek, List<TimeSpan>> NightSchedule { get; set; }
+    public Dictionary<int, List<TimeSpan>> DaySchedule { get; set; }
+    public Dictionary<int, List<TimeSpan>> NightSchedule { get; set; }
     public List<Service> AvailableServices { get; set; }
     Guid Visita_Guiada_randomId = Guid.NewGuid();
     Guid Visita_Guiada_Almuerzo_randomId = Guid.NewGuid();
@@ -38,17 +38,17 @@ public class ServiceMocks
         };
 
 
-        DaySchedule = new Dictionary<DayOfWeek, List<TimeSpan>>
+        DaySchedule = new Dictionary<int, List<TimeSpan>>
         {
-            { DayOfWeek.sábado, DayTime },
-            { DayOfWeek.domingo, DayTime }
+            {6, DayTime },
+            {0, DayTime }
         };
 
-        NightSchedule = new Dictionary<DayOfWeek, List<TimeSpan>>
+        NightSchedule = new Dictionary<int, List<TimeSpan>>
         {
-            { DayOfWeek.viernes, NightTime },
-            { DayOfWeek.sábado, NightTime },
-            { DayOfWeek.domingo, NightTime }
+            { 5, NightTime },
+            { 6, NightTime },
+            { 0, NightTime }
         };
 
         Service Visita_Guiada = new Service(
