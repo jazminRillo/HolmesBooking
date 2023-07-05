@@ -27,15 +27,15 @@ public class ServicesController : Controller
     {
         try
         {
-            CultureInfo culture = new CultureInfo("es-ES");
-            DayOfWeek Day = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), culture.DateTimeFormat.GetDayName(Date.DayOfWeek));
 
+            var dayOfWeek = GetDayOfWeek(Date);
             List<Service> Response = new();
 
             var services = _dbContext.Services
+                .AsEnumerable()
                 .Where(service => service.IsActive && Date >= service.StartDate
                     && Date <= service.EndDate
-                    && service.Schedule!.ContainsKey((int)Date.DayOfWeek)
+                    && service.Schedule!.ContainsKey(dayOfWeek)
                     && Date >= DateTime.Today)
                 .ToList();
 
@@ -48,6 +48,15 @@ public class ServicesController : Controller
         {
             throw;
         }
+    }
+
+    private int GetDayOfWeek(DateTime date)
+    {
+        var day = date.DayOfWeek;
+        if (day == DayOfWeek.Saturday)
+            return 0;
+        else
+            return (int)day + 1;
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
