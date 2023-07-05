@@ -1,41 +1,33 @@
 ﻿@model Reservation
 @{
-    ViewData["Title"] = "Editar Reserva";
-    DateTime timeValue = Model.Time!.Value;
-    string timeString = timeValue.ToString("yyyy-MM-ddTHH:mm:ss");
+    ViewData["Title"] = "Crear Reserva";
 }
 
-<h2>Editar Reserva</h2>
+<h2>Crear Reserva</h2>
 
 <form asp-action="SaveReservation" method="post">
     <div class="form-group">
         <label asp-for="Customer">Cliente</label>
         <select class="form-control" asp-for="Customer!.Id" asp-items="Model.CustomerOptions">
-            @foreach (var option in Model.CustomerOptions!)
-            {
-                <option value="@option.Value" selected="@option.Selected">@option.Text</option>
-            }
+            <option value="">Seleccione un cliente</option>
         </select>
     </div>
 
     <div class="form-group">
         <label asp-for="Service">Servicio</label>
         <select class="form-control" asp-for="Service!.Id" asp-items="Model.ServiceOptions" id="Service_Id">
-            @foreach (var option in Model.ServiceOptions!)
-            {
-                <option value="@option.Value" selected="@option.Selected">@option.Text</option>
-            }
+            <option value="">Seleccione un servicio</option>
         </select>
     </div>
 
     <div class="form-group">
         <label asp-for="Time">Fecha y Hora</label>
-        <input class="form-control" asp-for="Time" id="Time" type="date" readonly />
+        <input class="form-control" asp-for="Time" id="Time" type="text" readonly />
     </div>
 
     <div class="form-group">
         <label>Horarios Disponibles</label>
-        <select id="AvailableTimes" class="form-control" asp-for="TimeSelected" type="time"></select>
+        <select id="AvailableTimes" class="form-control" asp-for="TimeSelected"></select>
     </div>
 
     <div class="form-group">
@@ -62,8 +54,7 @@
         }
     </style>
 
-    <script>$(document).ready(function () {
-            initializeDatePicker();
+    <script>$(function () {
             $('#Service_Id').change(function () {
                 var selectedServiceId = $(this).val();
                 $.ajax({
@@ -96,6 +87,7 @@
                 changeYear: true,
                 showOtherMonths: true,
                 selectOtherMonths: true,
+                firstDay: 1,
                 beforeShowDay: $.datepicker.noWeekends,
                 onSelect: function (dateText) {
                     var selectedServiceId = $('#Service_Id').val();
@@ -122,44 +114,6 @@
                 }
             }).addClass("custom-datepicker");
 });
-        function initializeDatePicker() {
-            var timeValue = '@timeString';
-            var selectedServiceId = $('#Service_Id').val();
-            $.ajax({
-                url: '/services/get-service/' + selectedServiceId,
-                type: 'GET',
-                success: function (service) {
-                    if (service && service.schedule) {
-                        var schedule = service.schedule;
-                        var daysOfWeek = Object.keys(schedule).map(Number);
-                        var selectedDayOfWeek = getCustomDayOfWeek(new Date(timeValue));
-                        var availableTimes = schedule[selectedDayOfWeek];
-                        $("#AvailableTimes").empty();
-                        availableTimes.forEach(function (time) {
-                            var option = $("<option>").text(time).val(time);
-
-                            if (time === '@Model.TimeSelected') {
-                                option.attr('selected', 'selected');
-                            }
-
-                            $("#AvailableTimes").append(option);
-                        });
-                        $("#Time").datepicker("option", {
-                            beforeShowDay: function (date) {
-                                var dayOfWeek = date.getDay();
-                                return [daysOfWeek.includes(dayOfWeek) && schedule[dayOfWeek].length > 0];
-                            }
-                        });
-                    }
-                },
-                error: function () {
-                    console.log('Error al obtener la información del servicio');
-                }
-            });
-
-            $("#Time").datepicker("setDate", null);
-        }
-
         function getCustomDayOfWeek(date) {
             var dayOfWeek = date.getDay();
             if (dayOfWeek === 6) {

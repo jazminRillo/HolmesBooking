@@ -30,9 +30,15 @@ namespace HolmesBooking.DataBase
                     .Property(c => c.Classification)
                     .HasConversion(
                         v => v.ToString(),  // Convertir el valor del Enum a cadena de texto
-                        v => (Classification)Enum.Parse(typeof(Classification), v)  // Convertir la cadena de texto al Enum correspondiente
+                        v => (Classification)Enum.Parse(typeof(Classification), v!)  // Convertir la cadena de texto al Enum correspondiente
                     );
 
+            modelBuilder.Entity<Reservation>()
+                    .Property(c => c.State)
+                    .HasConversion(
+                        v => v.ToString(),  // Convertir el valor del Enum a cadena de texto
+                        v => (State)Enum.Parse(typeof(State), v!)  // Convertir la cadena de texto al Enum correspondiente
+                    );
         }
 
     }

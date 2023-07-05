@@ -1,5 +1,9 @@
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
 namespace HolmesBooking;
 
+[Table("Reservation")]
 public class Reservation
 {
     public Guid? Id { get; set; }
@@ -9,6 +13,12 @@ public class Reservation
     public State? State { get; set; }
     public int? NumberDiners { get; set; }
     public string? Note { get; set; }
+    [NotMapped]
+    public TimeSpan? TimeSelected { get; set; }
+    [NotMapped]
+    public List<SelectListItem>? CustomerOptions { get; internal set; }
+    [NotMapped]
+    public List<SelectListItem>? ServiceOptions { get; internal set; }
 
     public Reservation()
     {

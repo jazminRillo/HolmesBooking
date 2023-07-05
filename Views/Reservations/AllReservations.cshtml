@@ -6,6 +6,8 @@
     <thead>
         <tr>
             <th>Nombre Cliente</th>
+            <th>Nombre Servicio</th>
+            <th>Dia y Hora</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -14,6 +16,8 @@
         {
             <tr>
                 <td>@reservation.Customer!.Name</td>
+                <td>@reservation.Service!.Name</td>
+                <td>@reservation.Time</td>
                 <td>
                     <a href="@Url.Action("EditReservation", "Reservations", new { id = reservation.Id })">Edit</a>
                     <a asp-action="CancelReservation" asp-route-id="@reservation.Id">Cancel</a>

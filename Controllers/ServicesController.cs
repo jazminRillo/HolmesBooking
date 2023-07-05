@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using HolmesBooking.DataBase;
 using Microsoft.AspNetCore.Cors;
