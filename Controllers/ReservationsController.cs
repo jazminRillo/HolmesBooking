@@ -59,13 +59,15 @@ public class ReservationsController : Controller
                 {
                     existingReservation.Customer = _dbContext.Customers.Find(reservation.Customer!.Id);
                     existingReservation.Service = _dbContext.Services.Find(reservation.Service!.Id);
-                    existingReservation.Customer = reservation.Customer;
-                    existingReservation.Service = reservation.Service;
-                    existingReservation.Time = reservation.Time;
+                    DateTime date = reservation.Time!.Value;
+                    TimeSpan time = reservation.TimeSelected!.Value;
+                    DateTime combinedDateTime = new(date.Year, date.Month, date.Day, time.Hours, time.Minutes, time.Seconds);
+                    existingReservation.Time = combinedDateTime;
                     existingReservation.NumberDiners = reservation.NumberDiners;
                     existingReservation.Note = reservation.Note;
+                    existingReservation.State = reservation.State;
                     _dbContext.SaveChanges();
-                    return View("AllReservations", _dbContext.Reservations);
+                    return ShowAllReservations();
                 }
                 else
                 {

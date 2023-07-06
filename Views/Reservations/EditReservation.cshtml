@@ -8,9 +8,10 @@
 <h2>Editar Reserva</h2>
 
 <form asp-action="SaveReservation" method="post">
+    <input type="hidden" asp-for="Id" />
     <div class="form-group">
-        <label asp-for="Customer">Cliente</label>
-        <select class="form-control" asp-for="Customer!.Id">
+        <label for="Customer">Cliente</label>
+        <select class="form-control" id="Customer" asp-for="Customer!.Id">
             @foreach (var option in Model.CustomerOptions!)
             {
                 <option value="@option.Value" selected="@option.Selected">@option.Text</option>
@@ -19,8 +20,8 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="Service">Servicio</label>
-        <select class="form-control" asp-for="Service!.Id" id="Service_Id">
+        <label for="Service">Servicio</label>
+        <select class="form-control" id="Service_Id" asp-for="Service!.Id">
             @foreach (var option in Model.ServiceOptions!)
             {
                 <option value="@option.Value" selected="@option.Selected">@option.Text</option>
@@ -29,24 +30,38 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="Time">Fecha y Hora</label>
-        <input class="form-control" asp-for="Time" id="Time" type="date" readonly />
+        <label for="Time">Fecha y Hora</label>
+        <input class="form-control" id="Time" asp-for="Time" type="date" readonly />
     </div>
 
     <div class="form-group">
-        <label>Horarios Disponibles</label>
-        <select id="AvailableTimes" class="form-control" asp-for="TimeSelected" type="time"></select>
+        <label for="AvailableTimes">Horarios Disponibles</label>
+        <select class="form-control" id="AvailableTimes" asp-for="TimeSelected" type="time"></select>
     </div>
 
     <div class="form-group">
-        <label asp-for="NumberDiners">Cantidad de Personas</label>
-        <input class="form-control" asp-for="NumberDiners" />
+        <label for="NumberDiners">Cantidad de Personas</label>
+        <input class="form-control" id="NumberDiners" asp-for="NumberDiners" />
     </div>
 
     <div class="form-group">
-        <label asp-for="Note">Nota</label>
-        <textarea class="form-control" asp-for="Note"></textarea>
+        <label for="Note">Nota</label>
+        <textarea class="form-control" id="Note" asp-for="Note"></textarea>
     </div>
+
+
+    <div class="form-group">
+        <label>Estado de la reserva</label>
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            @foreach (var value in Enum.GetValues(typeof(State)))
+            {
+                <label class="btn btn-outline-primary @(value.Equals(Model.State) ? "active" : "")">
+                    <input type="radio" name="State" id="@($"state-{value}")" autocomplete="off" value="@value" @(value.Equals(Model.State) ? "checked" : "")> @value
+                </label>
+            }
+        </div>
+    </div>
+
 
     <button type="submit" class="btn btn-primary">Guardar</button>
 </form>
