@@ -10,7 +10,7 @@
 <form asp-action="SaveReservation" method="post">
     <div class="form-group">
         <label asp-for="Customer">Cliente</label>
-        <select class="form-control" asp-for="Customer!.Id" asp-items="Model.CustomerOptions">
+        <select class="form-control" asp-for="Customer!.Id">
             @foreach (var option in Model.CustomerOptions!)
             {
                 <option value="@option.Value" selected="@option.Selected">@option.Text</option>
@@ -20,7 +20,7 @@
 
     <div class="form-group">
         <label asp-for="Service">Servicio</label>
-        <select class="form-control" asp-for="Service!.Id" asp-items="Model.ServiceOptions" id="Service_Id">
+        <select class="form-control" asp-for="Service!.Id" id="Service_Id">
             @foreach (var option in Model.ServiceOptions!)
             {
                 <option value="@option.Value" selected="@option.Selected">@option.Text</option>

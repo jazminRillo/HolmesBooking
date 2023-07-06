@@ -1,6 +1,7 @@
 using System.Globalization;
 using HolmesBooking.DataBase;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HolmesBooking.Controllers;
@@ -23,24 +24,25 @@ public class ServicesController : Controller
 
     [EnableCors("_myAllowSpecificOrigins")]
     [HttpGet("/available-services/{Date}", Name = "GetAvailableServicesByDate")]
-    public List<Service>? GetAvailableServicesByDate(DateTime Date)
+    public List<Service>? GetAvailableServicesByDate(string Date)
     {
         try
         {
-            CultureInfo culture = new CultureInfo("es-ES");
-            DayOfWeek Day = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), culture.DateTimeFormat.GetDayName(Date.DayOfWeek));
-
+            DateTime date;
+            DateTime.TryParseExact(Date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out date);
+            var dayOfWeek = GetDayOfWeek(date);
             List<Service> Response = new();
 
             var services = _dbContext.Services
-                .Where(service => service.IsActive && Date >= service.StartDate
-                    && Date <= service.EndDate
-                    && service.Schedule!.ContainsKey((int)Date.DayOfWeek)
-                    && Date >= DateTime.Today)
+                .AsEnumerable()
+                .Where(service => service.IsActive && date >= service.StartDate
+                    && date <= service.EndDate
+                    && service.Schedule != null
+                    && service.Schedule.ContainsKey((int)date.DayOfWeek)
+                    && date >= DateTime.Today)
                 .ToList();
 
             Response.AddRange(services);
-
 
             return Response;
         }
@@ -48,6 +50,15 @@ public class ServicesController : Controller
         {
             throw;
         }
+    }
+
+    private int GetDayOfWeek(DateTime date)
+    {
+        var day = date.DayOfWeek;
+        if (day == DayOfWeek.Saturday)
+            return 0;
+        else
+            return (int)day + 1;
     }
 
     [EnableCors("_myAllowSpecificOrigins")]

@@ -37,8 +37,8 @@ public class ReservationsController : Controller
             {
                 if (ReservationValidations.IsValid(reservation))
                 {
-                    reservation.Customer = _dbContext.Customers.Find(reservation.Customer!.Id);
                     reservation.Service = _dbContext.Services.Find(reservation.Service!.Id);
+                    reservation.Customer = _dbContext.Customers.Find(reservation.Customer!.Id);
                     DateTime date = reservation.Time!.Value;
                     TimeSpan time = reservation.TimeSelected!.Value;
                     DateTime combinedDateTime = new(date.Year, date.Month, date.Day, time.Hours, time.Minutes, time.Seconds);
