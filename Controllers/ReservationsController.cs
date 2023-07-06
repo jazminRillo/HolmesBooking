@@ -131,7 +131,14 @@ public class ReservationsController : Controller
     {
         try
         {
-            return _dbContext.Reservations.ToList().Find(x => x.Id == reservationId)!;
+            Reservation reservation = GetReservationById(reservationId);
+            List<SelectListItem> customerOptions = GetCustomerOptions();
+            List<SelectListItem> serviceOptions = GetServiceOptions();
+            reservation.CustomerOptions = customerOptions;
+            reservation.ServiceOptions = serviceOptions;
+            reservation.TimeSelected = reservation.Time?.TimeOfDay;
+            reservation.Time = reservation.Time?.Date;
+            return reservation;
         }
         catch (Exception)
         {
