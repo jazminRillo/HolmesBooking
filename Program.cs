@@ -24,11 +24,13 @@ builder.Services.AddSingleton<ReservationMocks>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
-                      policy =>
-                      {
-                          policy.WithOrigins("http://*",
-                                              "http://localhost:3000").AllowAnyHeader();
-                      });
+                     policy =>
+                     {
+                         policy.WithOrigins("http://holmessoftware-001-site2.atempurl.com",
+                                            "http://localhost:3000")
+                               .AllowAnyHeader()
+                               .AllowAnyMethod();
+                     });
 });
 
 string connectionString = configuration.GetConnectionString("DefaultConnection")!;
@@ -57,7 +59,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseCors();
+app.UseCors("MyAllowSpecificOrigins");
 app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>
