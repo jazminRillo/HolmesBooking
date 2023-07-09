@@ -90,25 +90,14 @@ public class UsersController : Controller
             PasswordSalt = passwordSalt
         };
 
-        if (user.Roles != null && user.Roles.Any())
-        {
-            foreach (var roleAdded in user.Roles)
-            {
-                var role = _dbContext.Roles.FirstOrDefault(r => r.Name == roleAdded.Name);
-
-                if (role != null)
-                {
-                    var userRole = new UserRoles
-                    {
-                        User = newUser,
-                        Role = role
-                    };
-
-                    newUser.UserRoles!.Add(userRole);
-                }
-            }
-        }
         _dbContext.Users.Add(newUser);
+        var userRole = new UserRoles
+        {
+            User = newUser,
+            Role = _dbContext.Roles.FirstOrDefault(x => x.Name == "Admin")!
+        };
+
+        _dbContext.UserRoles.Add(userRole);
         _dbContext.SaveChangesAsync();
 
         return RedirectToAction("LoginUser");
