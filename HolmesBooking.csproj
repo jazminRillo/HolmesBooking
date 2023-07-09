@@ -18,12 +18,21 @@
   <ItemGroup>
     <None Remove="Views\Services\" />
     <None Remove="Views\Customers\" />
+    <None Remove="Views\Users\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Services\" />
     <Folder Include="Views\Customers\" />
+    <Folder Include="Views\Users\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Views\Home\EditServiceOld.cshtml" />
+    <Content Remove="Views\Shared\RegisterUser.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Views\Shared\Register.Usercshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
   </ItemGroup>
 </Project>
