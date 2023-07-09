@@ -131,7 +131,7 @@ public class ReservationsController : Controller
     {
         try
         {
-            Reservation reservation = GetReservationById(reservationId);
+            Reservation reservation = _dbContext.Reservations.Find(reservationId)!;
             List<SelectListItem> customerOptions = GetCustomerOptions();
             List<SelectListItem> serviceOptions = GetServiceOptions();
             reservation.CustomerOptions = customerOptions;

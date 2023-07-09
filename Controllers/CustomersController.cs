@@ -1,3 +1,6 @@
+using System.Data;
+using System.Security.Cryptography;
+using System.Text;
 using HolmesBooking.DataBase;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -38,8 +41,29 @@ public class CustomersController : Controller
                 if (CustomerValidations.IsValid(_dbContext.Customers.ToList(), customer))
                 {
                     _dbContext.Customers.Add(customer);
+                    byte[] passwordHash, passwordSalt;
+                    CreatePasswordHash(customer.Password!, out passwordHash, out passwordSalt);
+                    var newUser = new User
+                    {
+                        Username = customer.Email!,
+                        PasswordHash = passwordHash,
+                        PasswordSalt = passwordSalt,
+                        CustomerKey = customer.Id
+                    };
+                    _dbContext.Users.Add(newUser);
+                    var userRole = new UserRoles
+                    {
+                        User = newUser,
+                        Role = _dbContext.Roles.FirstOrDefault(x => x.Name == "User")!
+                    };
+
+                    _dbContext.UserRoles.Add(userRole);
                     _dbContext.SaveChanges();
-                    return View("AllCustomers", _dbContext.Customers.ToList());
+                    if (User.Identity!.IsAuthenticated)
+                    {
+                        return View("AllCustomers", _dbContext.Customers.ToList());
+                    }
+                    return Ok(customer);
                 }
                 else
                 {
@@ -57,7 +81,11 @@ public class CustomersController : Controller
                     existingCustomer.PhoneNumber = customer.PhoneNumber;
                     _dbContext.SaveChanges();
                 }
-                return View("AllCustomers", _dbContext.Customers.ToList());
+                if (!User.Identity!.IsAuthenticated)
+                {
+                    return View("AllCustomers", _dbContext.Customers.ToList());
+                }
+                return Ok(customer);
                 //revisar
                 /*if (CustomerValidations.IsValid(_dbContext.Customers.ToList(), customer)) 
                 {
@@ -140,5 +168,14 @@ public class CustomersController : Controller
         }
 
         return View("EditCustomer", customer);
+    }
+
+    private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+    {
+        using (var hmac = new HMACSHA512())
+        {
+            passwordSalt = hmac.Key;
+            passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+        }
     }
 }

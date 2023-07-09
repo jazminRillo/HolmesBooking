@@ -5,66 +5,73 @@
     string timeString = timeValue.ToString("yyyy-MM-ddTHH:mm:ss");
 }
 
-<h2>Editar Reserva</h2>
+<h2 class="text-center">Editar Reserva</h2>
 
-<form asp-action="SaveReservation" method="post">
-    <input type="hidden" asp-for="Id" />
-    <div class="form-group">
-        <label for="Customer">Cliente</label>
-        <select class="form-control" id="Customer" asp-for="Customer!.Id">
-            @foreach (var option in Model.CustomerOptions!)
-            {
-                <option value="@option.Value" selected="@option.Selected">@option.Text</option>
-            }
-        </select>
-    </div>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form asp-action="SaveReservation" method="post">
+                <input type="hidden" asp-for="Id" />
+                <div class="form-group">
+                    <label for="Customer">Cliente</label>
+                    <select class="form-control" id="Customer" asp-for="Customer!.Id">
+                        @foreach (var option in Model.CustomerOptions!)
+                        {
+                            <option value="@option.Value" selected="@option.Selected">@option.Text</option>
+                        }
+                    </select>
+                </div>
 
-    <div class="form-group">
-        <label for="Service">Servicio</label>
-        <select class="form-control" id="Service_Id" asp-for="Service!.Id">
-            @foreach (var option in Model.ServiceOptions!)
-            {
-                <option value="@option.Value" selected="@option.Selected">@option.Text</option>
-            }
-        </select>
-    </div>
+                <div class="form-group">
+                    <label for="Service">Servicio</label>
+                    <select class="form-control" id="Service_Id" asp-for="Service!.Id">
+                        @foreach (var option in Model.ServiceOptions!)
+                        {
+                            <option value="@option.Value" selected="@option.Selected">@option.Text</option>
+                        }
+                    </select>
+                </div>
 
-    <div class="form-group">
-        <label for="Time">Fecha y Hora</label>
-        <input class="form-control" id="Time" asp-for="Time" type="date" readonly />
-    </div>
+                <div class="form-group">
+                    <label for="Time">Fecha y Hora</label>
+                    <input class="form-control" id="Time" asp-for="Time" type="date" readonly />
+                </div>
 
-    <div class="form-group">
-        <label for="AvailableTimes">Horarios Disponibles</label>
-        <select class="form-control" id="AvailableTimes" asp-for="TimeSelected" type="time"></select>
-    </div>
+                <div class="form-group">
+                    <label for="AvailableTimes">Horarios Disponibles</label>
+                    <select class="form-control" id="AvailableTimes" asp-for="TimeSelected" type="time"></select>
+                </div>
 
-    <div class="form-group">
-        <label for="NumberDiners">Cantidad de Personas</label>
-        <input class="form-control" id="NumberDiners" asp-for="NumberDiners" />
-    </div>
+                <div class="form-group">
+                    <label for="NumberDiners">Cantidad de Personas</label>
+                    <input class="form-control" id="NumberDiners" asp-for="NumberDiners" />
+                </div>
 
-    <div class="form-group">
-        <label for="Note">Nota</label>
-        <textarea class="form-control" id="Note" asp-for="Note"></textarea>
-    </div>
+                <div class="form-group">
+                    <label for="Note">Nota</label>
+                    <textarea class="form-control" id="Note" asp-for="Note"></textarea>
+                </div>
 
+                <div class="form-group">
+                    <label>Estado de la reserva</label>
+                    <div class="form-check-inline">
+                        @foreach (var value in Enum.GetValues(typeof(State)))
+                        {
+                            <div class="form-check-inline">
+                                <input type="radio" class="form-check-input" name="State" id="@($"state-{value}")" value="@value" @(value.Equals(Model.State) ? "checked" : "")>
+                                <label class="form-check-label" for="@($"state-{value}")">@value</label>
+                            </div>
+                        }
+                    </div>
+                </div>
 
-    <div class="form-group">
-        <label>Estado de la reserva</label>
-        <div class="btn-group btn-group-toggle" data-toggle="buttons">
-            @foreach (var value in Enum.GetValues(typeof(State)))
-            {
-                <label class="btn btn-outline-primary @(value.Equals(Model.State) ? "active" : "")">
-                    <input type="radio" name="State" id="@($"state-{value}")" autocomplete="off" value="@value" @(value.Equals(Model.State) ? "checked" : "")> @value
-                </label>
-            }
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
         </div>
     </div>
-
-
-    <button type="submit" class="btn btn-primary">Guardar</button>
-</form>
+</div>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -74,6 +81,9 @@
     <style>
         .custom-datepicker .ui-datepicker-week-end {
             display: none;
+        }
+        .form-check-label {
+            font-size: 14px;
         }
     </style>
 

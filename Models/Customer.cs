@@ -10,6 +10,8 @@ public class Customer
     public string? Lastname { get; set; }
     public string? Email { get; set; }
     public string? PhoneNumber { get; set; }
+    [NotMapped]
+    public string? Password { get; set; }
     public Classification? Classification { get; set; }
 
     public Customer()

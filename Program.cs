@@ -1,5 +1,6 @@
 ﻿using HolmesBooking;
 using HolmesBooking.DataBase;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -36,6 +37,17 @@ string connectionString = configuration.GetConnectionString("DefaultConnection")
 // Configurar la conexión a la base de datos
 builder.Services.AddDbContext<HolmeBookingDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+}).AddCookie(options =>
+{
+    options.Cookie.Name = "booking";
+});
+
 var app = builder.Build();
 
 
@@ -58,6 +70,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 app.UseCors();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>
@@ -78,8 +91,14 @@ app.UseEndpoints(endpoints =>
         defaults: new { controller = "Reservations" });
 
     endpoints.MapControllerRoute(
+        name: "users",
+        pattern: "users/{action=Index}/{id?}",
+        defaults: new { controller = "Users" });
+
+    endpoints.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}");
+        pattern: "{controller=Home}/{action=Index}/{id?}"
+    );
 });
 
 
