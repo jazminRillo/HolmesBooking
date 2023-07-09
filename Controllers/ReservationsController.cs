@@ -86,14 +86,21 @@ public class ReservationsController : Controller
     // This endpoint works but it is not updated when you post a new reservation.
     [EnableCors("_myAllowSpecificOrigins")]
     [HttpGet("/all-reservations", Name = "GetAllReservations")]
-    public List<Reservation> GetAllReservations()
+    public List<Reservation> GetAllReservations(DateTime? date)
     {
         try
         {
-            return _dbContext.Reservations
+            var reservations = _dbContext.Reservations
                                     .Include(r => r.Customer)
                                     .Include(r => r.Service)
+                                    .OrderBy(x => x.Time)
                                     .ToList();
+            if (date.HasValue)
+            {
+                return reservations.FindAll(x => x.Time.GetValueOrDefault().Date == date.GetValueOrDefault().Date);
+            }
+
+            return reservations;
         }
         catch (Exception)
         {
@@ -101,9 +108,15 @@ public class ReservationsController : Controller
         }
     }
 
+    [HttpGet("/filtered-reservations/{date}", Name = "FilteredReservations")]
+    public IActionResult FilteredReservations(DateTime? date)
+    {
+        List<Reservation> reservations = GetAllReservations(date);
+        return View("AllReservations", reservations);
+    }
     public IActionResult ShowAllReservations()
     {
-        List<Reservation> reservations = GetAllReservations();
+        List<Reservation> reservations = GetAllReservations(null);
         return View("AllReservations", reservations);
     }
 

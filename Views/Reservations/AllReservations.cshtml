@@ -1,8 +1,9 @@
 ﻿@model List<Reservation>
 
 <h2>Reservas</h2>
+<input type="text" id="datepicker" />
 
-<table class="table">
+<table id="reservations" class="table">
     <thead>
         <tr>
             <th>Nombre Cliente</th>
@@ -28,3 +29,29 @@
 </table>
 
 <a asp-action="CreateReservation">Nueva Reserva</a>
+
+@section Scripts {
+    
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $("#datepicker").datepicker({
+                dateFormat: "yy-mm-dd",
+                showButtonPanel: true,
+                changeMonth: true,
+                changeYear: true,
+                showOtherMonths: true,
+                selectOtherMonths: true,
+                firstDay: 1,
+                onSelect: function (selectedDate) {
+                    window.location.href = '/filtered-reservations/' + selectedDate;
+                }
+            });
+        });
+    </script>
+}
+
+

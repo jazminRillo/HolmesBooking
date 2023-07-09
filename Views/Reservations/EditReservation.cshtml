@@ -157,7 +157,7 @@
                     if (service && service.schedule) {
                         var schedule = service.schedule;
                         var daysOfWeek = Object.keys(schedule).map(Number);
-                        var selectedDayOfWeek = getCustomDayOfWeek(new Date(timeValue));
+                        var selectedDayOfWeek = new Date(timeValue).getDay();
                         var availableTimes = schedule[selectedDayOfWeek];
                         $("#AvailableTimes").empty();
                         availableTimes.forEach(function (time) {
