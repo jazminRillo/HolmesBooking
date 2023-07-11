@@ -208,7 +208,6 @@ public class ReservationsController : Controller
         List<Customer> customers = _dbContext.Customers.ToList();
         List<Service> services = _dbContext.Services.ToList();
 
-        // Crear las listas de opciones
         List<SelectListItem> customerOptions = customers
             .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
             .ToList();
@@ -217,7 +216,6 @@ public class ReservationsController : Controller
             .Select(s => new SelectListItem { Value = s.Id.ToString(), Text = s.Name })
             .ToList();
 
-        // Crear el modelo de reserva
         Reservation model = new Reservation
         {
             CustomerOptions = customerOptions,
@@ -225,6 +223,48 @@ public class ReservationsController : Controller
         };
         return View("CreateReservation", model);
     }
+
+    [HttpPost("ChangeReservationState", Name = "ChangeReservationState")]
+    public IActionResult ChangeReservationState([FromForm] ChangeReservationStateViewModel reservationToBeUpdated)
+    {
+        var reservation = _dbContext.Reservations.Find(reservationToBeUpdated.id);
+
+        if (reservation == null)
+        {
+            return NotFound();
+        }
+
+        if (Enum.TryParse(reservationToBeUpdated.newState, out State parsedState))
+        {
+            reservation.State = parsedState;
+        }
+        else
+        {
+            return BadRequest("Estado de reserva inválido");
+        }
+
+        _dbContext.Update(reservation);
+        _dbContext.SaveChanges();
+
+        var response = new
+        {
+            badgeColor = GetBadgeColor(reservation.State.Value),
+            stateText = GetStateText(reservation.State.Value)
+        };
+
+        return Json(response);
+    }
+
+    private string GetBadgeColor(State state)
+    {
+        return "success";
+    }
+
+    private string GetStateText(State state)
+    {
+        return "Confirmada";
+    }
+
 
     private List<SelectListItem> GetCustomerOptions()
     {

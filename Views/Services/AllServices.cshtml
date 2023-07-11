@@ -1,35 +1,57 @@
-﻿@model List<Service>
-
-<h2>Servicios</h2>
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>Nombre</th>
-            <th>Activo</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var service in Model)
-        {
-            <tr>
-                <td>@service.Name</td>
-                <td>
-                    <input type="checkbox" readonly="readonly" @(service.IsActive ? "checked" : "") />
-                </td>
-                <td>
-                    <a href="@Url.Action("EditService", "Services", new { id = service.Id })">Edit</a>
-                    <a asp-action="DeleteService" asp-route-id="@service.Id">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-<a asp-action="CreateNewService" class="btn btn-primary">
-        <i class="bi bi-plus"></i> Crear nuevo servicio
- </a>
+﻿@using System.Globalization
 
 
-
-
+<div class="d-flex justify-content-between align-items-center">
+    <h2>Servicios</h2>
+    <a href="@Url.Action("CreateNewService", "Services")" class="mt-3 mb-3 btn btn-primary active">
+        <i class="bi bi-plus"></i> Crear servicio
+    </a>
+</div>
+<div class="accordion accordion-flush" id="reservations">
+    @foreach (var service in Model)
+    {
+        var accordionId = $"accordion-{service.Id}";
+        var collapseId = $"collapse-{service.Id}";
+        <div class="card">
+            <h2 class="card-header d-flex justify-content-between" id="@accordionId">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
+                    @service.Name
+                    <div class="ml-auto ms-2">
+                        @if (service.IsActive)
+                        {
+                            <span class="badge rounded-pill bg-success">Activo</span>
+                        }
+                        else
+                        {
+                            <span class="badge rounded-pill bg-danger">Inactivo</span>
+                        }
+                    </div>
+                </button>
+                
+            </h2>
+            <div id="@collapseId" class="collapse" aria-labelledby="@accordionId" data-bs-parent="#reservations">
+                <div class="card-body">
+                    <div>
+                        <div>
+                            <h4>Días disponibles:</h4>
+                            @foreach (var day in service.Schedule)
+                            {
+                                var culture = new CultureInfo("es-ES");
+                                var dayOfWeek = culture.DateTimeFormat.GetDayName((DayOfWeek)(day.Key));
+                                <p>@dayOfWeek</p>
+                                <ul>
+                                    @foreach (var time in day.Value)
+                                    {
+                                        <li>@time.ToString(@"hh\:mm") Hs</li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                        <a href="@Url.Action("EditService", "Services", new { id = service.Id })" class="btn btn-primary">Editar</a>
+                        <a href="@Url.Action("DeleteService", "Services", new { id = service.Id })" class="btn btn-danger">Eliminar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

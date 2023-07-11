@@ -1,27 +1,117 @@
-﻿@model List<Customer>
+﻿@model AllCustomersViewModel
+@{
+    int currentPage = Model.Page ?? 1;
+    int totalPages = Model.TotalPages.GetValueOrDefault();
+}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Clientes</h2>
+                <a asp-action="CreateCustomer" class="btn btn-primary active">
+                    <i class="bi bi-plus"></i> Nuevo Cliente
+                </a>
+            </div>
+            <div class="left-panel">
+                <div class="mt-5">
+                    <label for="searchInput" class="form-label">Buscar cliente:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Nombre de cliente">
 
-<h2>Clientes</h2>
+                    </div>
+                    <button class="btn btn-primary" id="searchButton" type="button">
+                        <i class="bi bi-search search-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="right-panel">
+                <div class="accordion accordion-flush" id="customers">
+                    @foreach (var customer in Model.Customers)
+                    {
+                        var accordionId = $"accordion-{customer.Id}";
+                        var collapseId = $"collapse-{customer.Id}";
+                        <div class="card">
+                            <h2 class="card-header d-flex justify-content-between" id="@accordionId">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
+                                    @customer.Name @customer.Lastname
+                                    <div class="ml-auto ms-2">
+                                        @if (customer.Classification == Classification.Bronce)
+                                        {
+                                            <span class="badge rounded-pill bg-info">
+                                                <i class="bi bi-award-fill"></i> Bronce
+                                            </span>
+                                        }
+                                        @if (customer.Classification == Classification.Oro)
+                                        {
+                                            <span class="badge rounded-pill bg-info">
+                                                <i class="bi bi-award-fill"></i> Oro
+                                            </span>
+                                        }
+                                        @if (customer.Classification == Classification.Plata)
+                                        {
+                                            <span class="badge rounded-pill bg-info">
+                                                <i class="bi bi-award-fill"></i> Plata
+                                            </span>
+                                        }
+                                        @if (customer.Classification == Classification.Platino)
+                                        {
+                                            <span class="badge rounded-pill bg-info">
+                                                <i class="bi bi-award-fill"></i> Platino
+                                            </span>
+                                        }
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="@collapseId" class="collapse" aria-labelledby="@accordionId" data-bs-parent="#customers">
+                                <div class="card-body">
+                                    <div>
+                                        <p>Email: @customer!.Email</p>
+                                        <p>Tel: @customer!.PhoneNumber</p>
+                                        <a href="@Url.Action("EditCustomer", "Customers", new { id = customer.Id })" class="btn btn-primary">Editar</a>
+                                        <a href="@Url.Action("DeleteService", "Customers", new { id = customer.Id })" class="btn btn-danger">Eliminar</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <nav aria-label="Paginación">
+                    <ul class="pagination justify-content-center mt-4">
+                        @if (currentPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { page = currentPage - 1 })">Anterior</a>
+                            </li>
+                        }
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var customer in Model)
-        {
-            <tr>
-                <td>@customer.Name</td>
-                <td>
-                    <a href="@Url.Action("EditCustomer", "Customers", new { id = customer.Id })">Edit</a>
-                    <a asp-action="DeleteCustomer" asp-route-id="@customer.Id">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                            </li>
+                        }
 
-<a asp-action="CreateCustomer">Nuevo Cliente</a>
+                        @if (currentPage < totalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { page = currentPage + 1 })">Siguiente</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
 
+@section Scripts {
+    <script>$(document).ready(function () {
+            $("#searchButton").click(function () {
+                var searchQuery = $("#searchInput").val();
+                var url = '/all-customers?page=1&search=' + encodeURIComponent(searchQuery);
+                window.location.href = url;
+            });
+        });</script>
+}

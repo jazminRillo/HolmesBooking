@@ -115,23 +115,76 @@ public class CustomersController : Controller
 
     [EnableCors("_myAllowSpecificOrigins")]
     [HttpGet("/all-customers", Name = "GetAllCustomers")]
-    public List<Customer> GetAllCustomers()
+    public IActionResult GetAllCustomers(int page = 1, int pageSize = 8, string search = "")
     {
         try
         {
-            return _dbContext.Customers.ToList();
+            var allCustomers = _dbContext.Customers.ToList();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                allCustomers = allCustomers
+                .Where(c => c.Name!.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                            c.Lastname!.Contains(search, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            }
+
+            var totalCustomers = allCustomers.Count;
+
+            var customersToDisplay = allCustomers
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var totalPages = (int)Math.Ceiling((double)totalCustomers / pageSize);
+
+            var viewModel = new AllCustomersViewModel
+            {
+                Customers = customersToDisplay,
+                Page = page,
+                TotalPages = totalPages
+            };
+
+            return View("AllCustomers", viewModel);
         }
         catch (Exception)
         {
-            throw;
+            return StatusCode(500);
         }
     }
 
-    public IActionResult ShowAllCustomers()
+    public IActionResult ShowAllCustomers(int page = 1, int pageSize = 8)
     {
-        List<Customer> customers = GetAllCustomers();
-        return View("AllCustomers", customers);
+        IActionResult result;
+        try
+        {
+            var allCustomers = _dbContext.Customers.ToList();
+            var totalCustomers = allCustomers.Count;
+
+            var customersToDisplay = allCustomers
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var totalPages = (int)Math.Ceiling((double)totalCustomers / pageSize);
+
+            var viewModel = new AllCustomersViewModel
+            {
+                Customers = customersToDisplay,
+                Page = page,
+                TotalPages = totalPages
+            };
+
+            result = View("AllCustomers", viewModel);
+        }
+        catch (Exception)
+        {
+            result = StatusCode(500);
+        }
+
+        return result;
     }
+
 
     [HttpGet("edit-customer/{id}", Name = "EditCustomer")]
     public IActionResult EditCustomer(Guid id)

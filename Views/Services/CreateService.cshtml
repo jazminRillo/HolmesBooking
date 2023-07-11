@@ -32,62 +32,74 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label asp-for="IsActive" class="form-label">Activo</label>
-                    <input type="checkbox" class="form-check-input" asp-for="IsActive" />
+                <div class="form-group d-flex align-items-center">                    
+                    <div class="form-check form-switch">
+                        <label asp-for="IsActive" class="form-label">Activo</label>
+                        <input type="checkbox" class="form-check-input" asp-for="IsActive" />
+                    </div>
                 </div>
+                    <div class="form-group">
+                        <label asp-for="MaxPeople" class="form-label">Cantidad máxima de reservas</label>
+                        <input class="form-control" asp-for="MaxPeople" />
+                    </div>
 
-                <div class="form-group">
-                    <label asp-for="MaxPeople" class="form-label">Cantidad máxima de reservas</label>
-                    <input class="form-control" asp-for="MaxPeople" />
-                </div>
+                    <div class="accordion accordion-flush" id="scheduleTimes">
+                        <div class="card-header">
+                            <h2 class="accordion-header" id="accordionId">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseId" aria-expanded="false" aria-controls="collapseId">
+                                    Programación de servicio
+                                </button>
+                            </h2>
+                            <div id="collapseId" class="accordion-collapse collapse" aria-labelledby="accordionId" data-bs-parent="#scheduleTimes">
+                                <div class="accordion-body">
+                                    <div class="row row-cols-1 g-3">
+                                        @foreach (var day in Enum.GetValues(typeof(DayOfWeek)))
+                                        {
+                                            var dayOfWeek = (DayOfWeek)day;
+                                            var dayValue = (int)dayOfWeek;
+                                            var scheduleDay = Model.Schedule.ContainsKey(dayValue) ? Model.Schedule[dayValue] : null;
+                                            var isAvailable = scheduleDay != null && scheduleDay.Count > 0;
 
-                <div class="accordion accordion-flush" id="scheduleTimes">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header bg-success" id="accordionId">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseId" aria-expanded="false" aria-controls="collapseId">
-                                Programación de servicio
-                            </button>
-                        </h2>
-                        <div id="collapseId" class="accordion-collapse collapse" aria-labelledby="accordionId" data-bs-parent="#scheduleTimes">
-                            <div class="accordion-body">
-                                @foreach (var day in Enum.GetValues(typeof(DayOfWeek)))
-                                {
-                                    var dayOfWeek = (DayOfWeek)day;
-                                    var dayValue = (int)dayOfWeek;
-                                    var scheduleDay = Model.Schedule.ContainsKey(dayValue) ? Model.Schedule[dayValue] : null;
-                                    var isAvailable = scheduleDay != null && scheduleDay.Count > 0;
-                                    <div class="form-group">
-                                        <label>@GetDayName(dayOfWeek)</label>
-                                        <div class="form-check">
-                                            <input class="form-check-input schedule-checkbox" type="checkbox" id="check_@(dayOfWeek.ToString())" name="Schedule[@dayValue].IsAvailable"
-                                                   value="true" @(isAvailable ? "checked" : "") />
-                                            <label class="form-check-label" for="check_@(dayOfWeek.ToString())">Disponible</label>
-                                        </div>
-                                        <div class="form-group schedule-times" id="schedule_@(dayOfWeek.ToString())" style="@(isAvailable ? "display: block;" : "display: none;")">
-                                            <div class="row">
-                                                @foreach (var time in ScheduleTime.GetAvailableTimes())
-                                                {
-                                                    var isChecked = scheduleDay != null && scheduleDay.Contains(time);
-                                                    <div class="col-2">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox" id="time_@(dayOfWeek.ToString())_@(time.ToString("hhmm"))" name="Schedule[@dayValue][]"
-                                                                   value="@time.ToString("hh\\:mm")" @(isChecked ? "checked" : "") />
-                                                            <label class="form-check-label" for="time_@(dayOfWeek.ToString())_@(time.ToString("hhmm"))">@time.ToString("hh\\:mm")</label>
+                                            <div class="col">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <h5 class="card-title">@GetDayName(dayOfWeek)</h5>
+                                                            <div class="form-check form-switch ms-2">
+                                                                <input class="form-check-input" type="checkbox" id="check_@(dayOfWeek.ToString())" name="Schedule[@dayValue].IsAvailable"
+                                                                       value="true" @(isAvailable ? "checked" : "") />
+                                                                <label class="form-check-label" for="check_@(dayOfWeek.ToString())"></label>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="schedule-times" id="schedule_@(dayOfWeek.ToString())" style="@(isAvailable ? "display: block;" : "display: none;")">
+                                                            <div class="row">
+                                                                @foreach (var time in ScheduleTime.GetAvailableTimes())
+                                                                {
+                                                                    var isChecked = scheduleDay != null && scheduleDay.Contains(time);
+                                                                    <div class="col-6 col-md-4 col-lg-3">
+                                                                        <div class="form-check">
+                                                                            <input class="form-check-input" type="checkbox" id="time_@(dayOfWeek.ToString())_@(time.ToString("hhmm"))" name="Schedule[@dayValue][]"
+                                                                                   value="@time.ToString("hh\\:mm")" @(isChecked ? "checked" : "") />
+                                                                            <label class="form-check-label" for="time_@(dayOfWeek.ToString())_@(time.ToString("hhmm"))">@time.ToString("hh\\:mm")</label>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                }
+                                                </div>
                                             </div>
-                                        </div>
+                                        }
                                     </div>
-                                }
+                                </div>
+
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-            </form>
+                    <button type="submit" class="mt-3 btn btn-primary active">Guardar</button>
+</form>
         </div>
     </div>
 </div>
@@ -125,18 +137,19 @@
             toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link image'
         });
         $(document).ready(function () {
-            $(".schedule-checkbox").change(function () {
-                var scheduleTimes = $(this).closest(".form-group").find(".schedule-times");
-                if ($(this).is(":checked")) {
-                    scheduleTimes.show();
+            $(".form-check-input").change(function () {
+                var dayValue = $(this).attr("id").split("_")[1];
+                var scheduleSection = $("#schedule_" + dayValue);
+                if ($(this).prop("checked")) {
+                    scheduleSection.show();
                 } else {
-                    scheduleTimes.hide();
+                    scheduleSection.hide();
                 }
             });
 
-            // Verificar el estado inicial de los checkboxes y mostrar/ocultar los horarios correspondientes
-            $(".schedule-checkbox:checked").each(function () {
-                $(this).closest(".form-group").find(".schedule-times").show();
+            $(".form-check-input:checked").each(function () {
+                var dayValue = $(this).attr("id").split("_")[1];
+                $("#schedule_" + dayValue).show();
             });
 
             // Inicializar datepicker con formato de fecha
