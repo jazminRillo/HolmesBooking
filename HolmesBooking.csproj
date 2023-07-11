@@ -13,6 +13,8 @@
     <PackageReference Include="jQuery" Version="3.7.0" />
     <PackageReference Include="Syncfusion.EJ.AspNet.Core" Version="20.4.0.44" />
     <PackageReference Include="Bootstrap.Datepicker" Version="1.8.0.1" />
+    <PackageReference Include="Bootstrap.v3.Datetimepicker.CSS" Version="4.17.49" />
+    <PackageReference Include="TinyMCE" Version="6.5.1" />
   </ItemGroup>
 
   <ItemGroup>

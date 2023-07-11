@@ -1,97 +1,130 @@
 ﻿@model Service
 
-<h2>Crear nuevo servicio</h2>
+<h2 class="text-center">Crear nuevo servicio</h2>
 
-<form asp-action="CreateService" method="post">
-    <div class="form-group">
-        <label asp-for="Name" class="form-label">Nombre del Servicio</label>
-        <input class="form-control" asp-for="Name" />
-        <span asp-validation-for="Name" class="text-danger"></span>
-    </div>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form asp-action="UpdateService" method="post">
 
-    <div class="form-group">
-        <label asp-for="StartDate" class="form-label">Fecha Inicio</label>
-        <input id="startDatePicker" class="form-control" asp-for="StartDate" />
-    </div>
+                <input type="hidden" asp-for="Id" />
 
-    <div class="form-group">
-        <label asp-for="EndDate" class="form-label">Fecha Fin</label>
-        <input id="endDatePicker" class="form-control" asp-for="EndDate" />
-    </div>
-
-    <div class="form-group">
-        <label asp-for="IsActive" class="form-label">Activo</label>
-        <input type="checkbox" class="form-check-input" asp-for="IsActive" />
-    </div>
-
-    <div class="form-group">
-        <label asp-for="MaxPeople" class="form-label">Cantidad máxima de reservas</label>
-        <input class="form-control" asp-for="MaxPeople" />
-    </div>
-
-    <div class="schedule-section">
-        <h4>Programación de servicio</h4>
-        @foreach (var day in Enum.GetValues(typeof(DayOfWeek)))
-        {
-            var dayOfWeek = (DayOfWeek)day;
-            var dayValue = (int)dayOfWeek;
-            var counter = 0;
-            <div class="form-group">
-                <label>@GetDayName(dayOfWeek)</label>
-                <div class="form-check">
-                    <input class="form-check-input schedule-checkbox" type="checkbox" id="check_@(dayOfWeek.ToString())" name="Schedule[@dayValue].@(counter).IsAvailable"
-                           value="true" @(Model.Schedule.ContainsKey(((int)dayOfWeek)) ? "checked" : "") />
-                    <label class="form-check-label" for="check_@(dayOfWeek.ToString())">Disponible</label>
+                <div class="form-group">
+                    <label asp-for="Name" class="form-label">Nombre del Servicio</label>
+                    <input class="form-control" asp-for="Name" />
                 </div>
-                <div class="form-group schedule-times" id="schedule_@(dayOfWeek.ToString())" style="@(Model.Schedule.ContainsKey(((int)dayOfWeek)) ? "display: block;" : "display: none;")">
+
+                <div class="form-group">
+                    <label asp-for="Description" class="form-label">Descripción</label>
+                    <textarea id="Description" class="form-control" asp-for="Description"></textarea>
+                </div>
+
+                <div class="form-group">
                     <div class="row">
-                        @foreach (var time in ScheduleTime.GetAvailableTimes())
-                        {
-                            <div class="col-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="time_@(dayOfWeek.ToString())_@(time.ToString("hhmm"))" name="Schedule[@dayValue][]"
-                                           value="@time.ToString("hh\\:mm")" @(Model.Schedule.ContainsKey(((int)dayOfWeek)) && Model.Schedule[((int)dayOfWeek)].Contains(time) ? "checked" : "") />
-                                    <label class="form-check-label" for="time_@(dayOfWeek.ToString())_@(time.ToString("hhmm"))">@time.ToString("hh\\:mm")</label>
-                                </div>
-                            </div>
-                        }
+                        <div class="col-md-6">
+                            <label asp-for="StartDate" class="form-label">Fecha Inicio</label>
+                            <input id="startDatePicker" class="form-control" asp-for="StartDate" type="date" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="EndDate" class="form-label">Fecha Fin</label>
+                            <input id="endDatePicker" class="form-control" asp-for="EndDate" type="date" />
+                        </div>
                     </div>
                 </div>
-            </div>
-        }
+
+                <div class="form-group">
+                    <label asp-for="IsActive" class="form-label">Activo</label>
+                    <input type="checkbox" class="form-check-input" asp-for="IsActive" />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="MaxPeople" class="form-label">Cantidad máxima de reservas</label>
+                    <input class="form-control" asp-for="MaxPeople" />
+                </div>
+
+                <div class="accordion accordion-flush" id="scheduleTimes">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header bg-success" id="accordionId">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseId" aria-expanded="false" aria-controls="collapseId">
+                                Programación de servicio
+                            </button>
+                        </h2>
+                        <div id="collapseId" class="accordion-collapse collapse" aria-labelledby="accordionId" data-bs-parent="#scheduleTimes">
+                            <div class="accordion-body">
+                                @foreach (var day in Enum.GetValues(typeof(DayOfWeek)))
+                                {
+                                    var dayOfWeek = (DayOfWeek)day;
+                                    var dayValue = (int)dayOfWeek;
+                                    var scheduleDay = Model.Schedule.ContainsKey(dayValue) ? Model.Schedule[dayValue] : null;
+                                    var isAvailable = scheduleDay != null && scheduleDay.Count > 0;
+                                    <div class="form-group">
+                                        <label>@GetDayName(dayOfWeek)</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input schedule-checkbox" type="checkbox" id="check_@(dayOfWeek.ToString())" name="Schedule[@dayValue].IsAvailable"
+                                                   value="true" @(isAvailable ? "checked" : "") />
+                                            <label class="form-check-label" for="check_@(dayOfWeek.ToString())">Disponible</label>
+                                        </div>
+                                        <div class="form-group schedule-times" id="schedule_@(dayOfWeek.ToString())" style="@(isAvailable ? "display: block;" : "display: none;")">
+                                            <div class="row">
+                                                @foreach (var time in ScheduleTime.GetAvailableTimes())
+                                                {
+                                                    var isChecked = scheduleDay != null && scheduleDay.Contains(time);
+                                                    <div class="col-2">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" id="time_@(dayOfWeek.ToString())_@(time.ToString("hhmm"))" name="Schedule[@dayValue][]"
+                                                                   value="@time.ToString("hh\\:mm")" @(isChecked ? "checked" : "") />
+                                                            <label class="form-check-label" for="time_@(dayOfWeek.ToString())_@(time.ToString("hhmm"))">@time.ToString("hh\\:mm")</label>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </form>
+        </div>
     </div>
-
-
-
-    <button type="submit" class="btn btn-primary">Crear servicio</button>
-</form>
+</div>
 @functions {
     public string GetDayName(System.DayOfWeek dayOfWeek)
     {
-        // Puedes personalizar este código para mostrar los nombres de los días en español
         switch (dayOfWeek)
         {
             case System.DayOfWeek.Monday:
-                return "lunes";
+                return "Lunes";
             case System.DayOfWeek.Tuesday:
-                return "martes";
+                return "Martes";
             case System.DayOfWeek.Wednesday:
-                return "miércoles";
+                return "Miércoles";
             case System.DayOfWeek.Thursday:
-                return "jueves";
+                return "Jueves";
             case System.DayOfWeek.Friday:
-                return "viernes";
+                return "Viernes";
             case System.DayOfWeek.Saturday:
-                return "sábado";
+                return "Sábado";
             case System.DayOfWeek.Sunday:
-                return "domingo";
+                return "Domingo";
             default:
                 return string.Empty;
         }
     }
 }
 @section Scripts {
-    <script>$(document).ready(function () {
+    <script src="https://cdn.tiny.cloud/1/bxg4yyrv6hylk2q29qlwb3cs99roqgq1awpravf4t1re5edw/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>tinymce.init({
+            selector: 'textarea#Description',
+            height: 300,
+            language: 'es',
+            plugins: 'advlist autolink lists link image charmap print preview anchor image',
+            toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link image'
+        });
+        $(document).ready(function () {
             $(".schedule-checkbox").change(function () {
                 var scheduleTimes = $(this).closest(".form-group").find(".schedule-times");
                 if ($(this).is(":checked")) {
@@ -141,6 +174,10 @@
             .schedule-times .col-2 {
                 padding: 0;
             }
+        .bg-success .accordion-button {
+            background-color: green;
+            color: white;
+        }
     </style>
 }
 

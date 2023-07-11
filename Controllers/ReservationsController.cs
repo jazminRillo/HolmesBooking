@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Runtime.Intrinsics.X86;
 using HolmesBooking;
 using HolmesBooking.DataBase;
@@ -108,16 +109,47 @@ public class ReservationsController : Controller
         }
     }
 
-    [HttpGet("/filtered-reservations/{date}", Name = "FilteredReservations")]
-    public IActionResult FilteredReservations(DateTime? date)
+    [HttpGet("/filtered-reservations", Name = "FilteredReservations")]
+    public IActionResult FilteredReservations([FromQuery] string? selectedServices, DateTime? selectedDate)
     {
-        List<Reservation> reservations = GetAllReservations(date);
-        return View("AllReservations", reservations);
+        var selectedServicesIds = ConvertStringToGuidList(selectedServices);
+        List<Reservation> reservations = GetAllReservations(selectedDate.GetValueOrDefault(DateTime.Today));
+        if (selectedServicesIds.Count > 0)
+        {
+            reservations = reservations.Where(r => selectedServicesIds.Contains(r.Service!.Id)).ToList();
+        }
+        var model = new AllServicesViewModel
+        {
+            Reservations = reservations,
+            Services = _dbContext.Services.ToList(),
+            SelectedServices = selectedServicesIds,
+            SelectedDate = selectedDate
+        };
+        return View("AllReservations", model);
     }
+
+    private List<Guid> ConvertStringToGuidList(string? guidString)
+    {
+        if (string.IsNullOrEmpty(guidString))
+            return new List<Guid>();
+
+        var guidArray = guidString.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        var guidList = guidArray.Select(x => Guid.Parse(x)).ToList();
+
+        return guidList;
+    }
+
     public IActionResult ShowAllReservations()
     {
-        List<Reservation> reservations = GetAllReservations(null);
-        return View("AllReservations", reservations);
+        List<Reservation> reservations = GetAllReservations(DateTime.Today);
+        var model = new AllServicesViewModel
+        {
+            Reservations = reservations,
+            Services = _dbContext.Services.ToList(),
+            SelectedServices = new List<Guid>(),
+            SelectedDate = DateTime.Today
+        };
+        return View("AllReservations", model);
     }
 
     [HttpGet("edit-reservation/{id}", Name = "EditReservation")]

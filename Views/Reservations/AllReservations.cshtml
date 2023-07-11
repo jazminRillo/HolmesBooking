@@ -1,57 +1,132 @@
-﻿@model List<Reservation>
+﻿@using System.Globalization
+<div class="container">
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="left-panel">
+                <div class="text-center">
+                    <a asp-action="CreateReservation" class="btn btn-secondary active">
+                        <i class="bi bi-plus"></i> Nueva Reserva
+                    </a>
+                </div>
+                <div id="datepicker"></div>
+                <div class="mt-3">
+                    <label for="serviceFilter" class="form-label">Filtrar por servicio:</label>
+                    @foreach (var service in Model.Services)
+                    {
+                        var id = "serviceFilter-" + service.Id;
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="@id" value="@service.Id">
+                            <label class="form-check-label" for="@id">@service.Name</label>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="right-panel">
+                @{
+                    var selectedDate = Model.SelectedDate;
+                    var formattedDate = $"{selectedDate.Day} de {CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(selectedDate.Month)} de {selectedDate.Year}";
+                }
+                <h2>Reservas - @formattedDate</h2>
+                <div class="accordion accordion-flush" id="reservations">
+                    @foreach (var reservation in Model.Reservations)
+                    {
+                        var accordionId = $"accordion-{reservation.Id}";
+                        var collapseId = $"collapse-{reservation.Id}";
+                        var reservationTime = reservation.Time?.ToString("HH:mm");
+                        var stateClass = reservation.State == State.CONFIRMADA ? "bg-success" :
+                                         reservation.State == State.DEMORADA ? "bg-warning" :
+                                         reservation.State == State.CANCELADA ? "bg-danger" : "";
+                        <div class="accordion-item">
+                            <h2 class="accordion-header @stateClass" id="@accordionId">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
+                                    @reservationTime Hs - @reservation.Customer!.Name @reservation.Customer!.Lastname - @reservation.NumberDiners p - @reservation.State
+                                </button>
+                            </h2>
+                            <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@accordionId" data-bs-parent="#reservations">
+                                <div class="accordion-body">
+                                    <p>Servicio: @reservation.Service!.Name</p>
+                                    <p>Email: @reservation.Customer!.Email</p>
+                                    <p>Tel: @reservation.Customer!.PhoneNumber</p>
+                                    <p>Nota: @reservation.Note</p>
+                                    <a href="@Url.Action("EditReservation", "Reservations", new { id = reservation.Id })" class="btn btn-primary">Editar</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<h2>Reservas</h2>
-<input type="text" id="datepicker" />
 
-<table id="reservations" class="table">
-    <thead>
-        <tr>
-            <th>Nombre Cliente</th>
-            <th>Nombre Servicio</th>
-            <th>Dia y Hora</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var reservation in Model)
-        {
-            <tr>
-                <td>@reservation.Customer!.Name</td>
-                <td>@reservation.Service!.Name</td>
-                <td>@reservation.Time</td>
-                <td>
-                    <a href="@Url.Action("EditReservation", "Reservations", new { id = reservation.Id })">Edit</a>
-                    <a asp-action="CancelReservation" asp-route-id="@reservation.Id">Cancel</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<a asp-action="CreateReservation">Nueva Reserva</a>
 
 @section Scripts {
-    
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
 
-    <script>
-        $(document).ready(function () {
+    <style>
+
+        .bg-success .accordion-button {
+            background-color: green;
+            color: white;
+        }
+
+        .bg-warning .accordion-button {
+            background-color: orange;
+            color: white;
+        }
+
+        .bg-danger .accordion-button {
+            background-color: red;
+            color: white;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js" integrity="sha512-LsnSViqQyaXpD4mBBdRYeP6sRwJiJveh2ZIbW41EBrNmKxgr/LFZIiWT6yr+nycvhvauz8c2nYMhrP80YhG7Cw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/locales/bootstrap-datepicker.es.min.js" integrity="sha512-5pjEAV8mgR98bRTcqwZ3An0MYSOleV04mwwYj2yw+7PBhFVf/0KcE+NEox0XrFiU5+x5t5qidmo5MgBkDD9hEw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css" integrity="sha512-34s5cpvaNG3BknEWSuOncX28vz97bRI59UnVtEEpFX536A7BtZSJHsDyFoCl8S7Dt2TPzcrCEoHBGeM4SUBDBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker3.min.css" integrity="sha512-aQb0/doxDGrw/OC7drNaJQkIKFu6eSWnVMAwPN64p6sZKeJ4QCDYL42Rumw2ZtL8DB9f66q4CnLIUnAw28dEbg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script>$(document).ready(function () {
+            var selectedDate = "@Model.SelectedDate?.ToString("yyyy-MM-dd")";
+            var selectedServices = @Html.Raw(Json.Serialize(Model.SelectedServices ?? new List<Guid>()));
             $("#datepicker").datepicker({
                 dateFormat: "yy-mm-dd",
-                showButtonPanel: true,
-                changeMonth: true,
-                changeYear: true,
-                showOtherMonths: true,
-                selectOtherMonths: true,
-                firstDay: 1,
-                onSelect: function (selectedDate) {
-                    window.location.href = '/filtered-reservations/' + selectedDate;
-                }
+                todayHighlight: true,
+                language: "es"
+            }).on('changeDate', function (e) {
+                var selectedDate = e.format(0, 'yyyy-mm-dd');
+                var selectedServices = getSelectedServices();
+                navigateToFilteredReservations(selectedDate, selectedServices);
             });
-        });
-    </script>
+
+            if (selectedDate) {
+                $("#datepicker").val(selectedDate);
+            }
+
+            selectedServices.forEach(function (serviceId) {
+                $("#serviceFilter-" + serviceId).prop("checked", true);
+            });
+
+            $(".form-check-input").change(function () {
+                var selectedDate = $("#datepicker").val();
+                var selectedServices = getSelectedServices();
+                navigateToFilteredReservations(selectedDate, selectedServices);
+            });
+
+            function getSelectedServices() {
+                var selectedServices = [];
+                $(".form-check-input:checked").each(function () {
+                    selectedServices.push($(this).val());
+                });
+                return selectedServices;
+            }
+
+            function navigateToFilteredReservations(date, services) {
+                var url = '/filtered-reservations?selectedServices=' + encodeURIComponent(services.join(',')) + '&selectedDate=' + encodeURIComponent(date);
+                window.location.href = url;
+            }
+        });</script>
 }
 
 

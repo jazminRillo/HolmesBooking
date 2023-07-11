@@ -135,6 +135,7 @@ public class ServicesController : Controller
                 existingService.IsActive = service.IsActive;
                 existingService.MaxPeople = service.MaxPeople;
                 existingService.Schedule = service.Schedule;
+                existingService.Description = service.Description;
                 _dbContext.SaveChanges();
             }
 

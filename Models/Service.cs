@@ -13,6 +13,7 @@ public class Service
     public DateTime? EndDate { get; set; }
     public bool IsActive { get; set; }
     public int? MaxPeople { get; set; }
+    public string? Description { get; set; }
 
     [Column(TypeName = "json")]
     public Dictionary<int, List<TimeSpan>> Schedule { get; set; }

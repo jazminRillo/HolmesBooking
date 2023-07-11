@@ -1,11 +1,12 @@
 ﻿@model List<Service>
 
-<h2>All Services</h2>
+<h2>Servicios</h2>
 
 <table class="table">
     <thead>
         <tr>
-            <th>Service Name</th>
+            <th>Nombre</th>
+            <th>Activo</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -15,6 +16,9 @@
             <tr>
                 <td>@service.Name</td>
                 <td>
+                    <input type="checkbox" readonly="readonly" @(service.IsActive ? "checked" : "") />
+                </td>
+                <td>
                     <a href="@Url.Action("EditService", "Services", new { id = service.Id })">Edit</a>
                     <a asp-action="DeleteService" asp-route-id="@service.Id">Delete</a>
                 </td>
@@ -22,8 +26,9 @@
         }
     </tbody>
 </table>
-
-<a asp-action="CreateNewService">Crear nuevo servicio</a>
+<a asp-action="CreateNewService" class="btn btn-primary">
+        <i class="bi bi-plus"></i> Crear nuevo servicio
+ </a>
 
 
 
