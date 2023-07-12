@@ -117,7 +117,7 @@ public class CustomersController : Controller
                     {
                         return View("AllCustomers", _dbContext.Customers.ToList());
                     }
-                    return Ok(customer);
+                    return Ok(_dbContext.Customers.FirstOrDefault(x => x.Email == customer.Email));
                 }
                 else
                 {

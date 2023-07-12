@@ -26,7 +26,8 @@ public class CustomerValidations
         return customers.Find(x => x.Id == Id)!;
     }
 
-    public static bool IsValid(List<Customer> customers, Customer c)
+    public static bool
+        IsValid(List<Customer> customers, Customer c)
     {
         if (string.IsNullOrEmpty(c.Name) || string.IsNullOrEmpty(c.Email))
         {
