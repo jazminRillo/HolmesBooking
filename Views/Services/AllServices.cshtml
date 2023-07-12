@@ -33,6 +33,7 @@
                 <div class="card-body">
                     <div>
                         <div>
+                            <p>@Html.Raw(service.Description)</p>
                             <h4>Días disponibles:</h4>
                             @foreach (var day in service.Schedule)
                             {

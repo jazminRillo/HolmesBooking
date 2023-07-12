@@ -133,7 +133,7 @@ public class ServicesController : Controller
                 _dbContext.SaveChanges();
             }
 
-            return RedirectToAction("ShowAllServices");
+            return RedirectToAction("GetAllServices");
         }
 
         // El modelo no es válido, regresar la vista "EditService" con los errores de validación
@@ -154,7 +154,7 @@ public class ServicesController : Controller
             _dbContext.Services.Add(service);
             _dbContext.SaveChanges();
 
-            return RedirectToAction("ShowAllServices");
+            return RedirectToAction("GetAllServices");
         }
 
         return View("CreateService", service);

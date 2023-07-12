@@ -8,20 +8,27 @@
                         <i class="bi bi-plus"></i> Nueva Reserva
                     </a>
                 </div>
-                <div id="datepicker"></div>
+                <div class="mt-3">
+                    <div class="input-group">
+                        <div class="mb-4" id="datepicker"></div>
+                    </div>
+                </div>
                 <div class="mt-3">
                     <label for="serviceFilter" class="form-label">Filtrar por servicio:</label>
-                    @foreach (var service in Model.Services)
-                    {
-                        var id = "serviceFilter-" + service.Id;
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="@id" value="@service.Id">
-                            <label class="form-check-label" for="@id">@service.Name</label>
-                        </div>
-                    }
+                    <div class="form-check">
+                        @foreach (var service in Model.Services)
+                        {
+                            var id = "serviceFilter-" + service.Id;
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="@id" value="@service.Id">
+                                <label class="form-check-label" for="@id">@service.Name</label>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
+
         <div class="col-lg-8">
             <div class="right-panel">
                 @{
@@ -80,7 +87,8 @@
                                     <div class="dropdown">
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-secondary dropdown-toggle dropdown-toggle-split" type="button" id="dropdownMenuButton-@(reservation.Id)" data-bs-toggle="dropdown" aria-expanded="false">
-                                            Estado </button>
+                                                Estado
+                                            </button>
                                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-@(reservation.Id)">
                                                 <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeReservationState('@reservation.Id', 'CONFIRMADA')">Confirmada</a></li>
                                                 <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeReservationState('@reservation.Id', 'DEMORADA')">Demorada</a></li>
@@ -88,8 +96,8 @@
                                                 <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeReservationState('@reservation.Id', 'SIN_CONFIRMAR')">Sin Confirmar</a></li>
                                             </ul>
                                         </div>
-                                        </div>
                                     </div>
+                                </div>
                             </h2>
                             <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@accordionId" data-bs-parent="#reservations">
                                 <div class="card-body">
