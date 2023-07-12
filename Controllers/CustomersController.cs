@@ -244,6 +244,18 @@ public class CustomersController : Controller
         return View("EditCustomer", customer);
     }
 
+    [HttpPost]
+    public IActionResult DeleteCustomer(Guid id)
+    {
+        var customerToDelete = _dbContext.Customers.FirstOrDefault(x => x.Id == id);
+        if (customerToDelete != null)
+        {
+            _dbContext.Customers.Remove(customerToDelete);
+            _dbContext.SaveChanges();
+        }
+        return View("AllCustomers", _dbContext.Customers.ToList());
+    }
+
     private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
     {
         using (var hmac = new HMACSHA512())
