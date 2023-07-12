@@ -26,6 +26,60 @@ public class CustomersController : Controller
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
+    [HttpPost("/external-login", Name = "ExternalLogin")]
+    public IActionResult ExternalLogin([FromForm] Customer customer)
+    {
+        try
+        {
+            if (CustomerValidations.IsNull(customer))
+            {
+                return BadRequest("Cliente NULO.");
+            }
+
+            var existingCustomer = _dbContext.Customers.FirstOrDefault(x => x.Email == customer.Email);
+            if (existingCustomer == null)
+            {
+                customer.Password = "google";
+                if (CustomerValidations.IsValid(_dbContext.Customers.ToList(), customer))
+                {
+                    _dbContext.Customers.Add(customer);
+                    byte[] passwordHash, passwordSalt;
+                    CreatePasswordHash(customer.Password!, out passwordHash, out passwordSalt);
+                    var newUser = new User
+                    {
+                        Username = customer.Email!,
+                        PasswordHash = passwordHash,
+                        PasswordSalt = passwordSalt,
+                        CustomerKey = customer.Id
+                    };
+                    _dbContext.Users.Add(newUser);
+                    var userRole = new UserRoles
+                    {
+                        User = newUser,
+                        Role = _dbContext.Roles.FirstOrDefault(x => x.Name == "User")!
+                    };
+
+                    _dbContext.UserRoles.Add(userRole);
+                    _dbContext.SaveChanges();
+                    return Ok(customer);
+                }
+                else
+                {
+                    return BadRequest("Cliente no válido.");
+                }
+            }
+            else
+            {
+                return Ok(customer);
+            }
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    [EnableCors("_myAllowSpecificOrigins")]
     [HttpPost("/save-customer", Name = "SaveCustomer")]
     public IActionResult SaveCustomer([FromForm] Customer customer)
     {
@@ -115,7 +169,7 @@ public class CustomersController : Controller
 
     [EnableCors("_myAllowSpecificOrigins")]
     [HttpGet("/all-customers", Name = "GetAllCustomers")]
-    public IActionResult GetAllCustomers(int page = 1, int pageSize = 8, string search = "")
+    public IActionResult GetAllCustomers(int page = 1, int pageSize = 8, string? search = "")
     {
         try
         {
@@ -152,39 +206,6 @@ public class CustomersController : Controller
             return StatusCode(500);
         }
     }
-
-    public IActionResult ShowAllCustomers(int page = 1, int pageSize = 8)
-    {
-        IActionResult result;
-        try
-        {
-            var allCustomers = _dbContext.Customers.ToList();
-            var totalCustomers = allCustomers.Count;
-
-            var customersToDisplay = allCustomers
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            var totalPages = (int)Math.Ceiling((double)totalCustomers / pageSize);
-
-            var viewModel = new AllCustomersViewModel
-            {
-                Customers = customersToDisplay,
-                Page = page,
-                TotalPages = totalPages
-            };
-
-            result = View("AllCustomers", viewModel);
-        }
-        catch (Exception)
-        {
-            result = StatusCode(500);
-        }
-
-        return result;
-    }
-
 
     [HttpGet("edit-customer/{id}", Name = "EditCustomer")]
     public IActionResult EditCustomer(Guid id)

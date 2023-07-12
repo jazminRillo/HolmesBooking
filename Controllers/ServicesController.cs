@@ -68,7 +68,7 @@ public class ServicesController : Controller
         try
         {
             List<Service> services = _dbContext.Services.ToList();
-            return Ok(services);
+            return View("AllServices", services);
         }
         catch (Exception)
         {
@@ -80,12 +80,6 @@ public class ServicesController : Controller
     public IActionResult AddSchedule(int serviceId, [FromBody] Schedule schedule)
     {
         return Ok();
-    }
-
-    public IActionResult ShowAllServices()
-    {
-        List<Service> services = _dbContext.Services.ToList();
-        return View("AllServices", services);
     }
 
     [HttpGet("edit-service/{id}", Name = "EditService")]

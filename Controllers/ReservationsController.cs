@@ -46,7 +46,7 @@ public class ReservationsController : Controller
                     reservation.Time = combinedDateTime;
                     _dbContext.Reservations.Add(reservation);
                     _dbContext.SaveChanges();
-                    return ShowAllReservations();
+                    return FilteredReservations(null, null);
                 }
                 else
                 {
@@ -68,7 +68,7 @@ public class ReservationsController : Controller
                     existingReservation.Note = reservation.Note;
                     existingReservation.State = reservation.State;
                     _dbContext.SaveChanges();
-                    return ShowAllReservations();
+                    return FilteredReservations(null, null);
                 }
                 else
                 {
@@ -112,6 +112,7 @@ public class ReservationsController : Controller
     [HttpGet("/filtered-reservations", Name = "FilteredReservations")]
     public IActionResult FilteredReservations([FromQuery] string? selectedServices, DateTime? selectedDate)
     {
+        if (selectedDate == null) selectedDate = DateTime.Today;
         var selectedServicesIds = ConvertStringToGuidList(selectedServices);
         List<Reservation> reservations = GetAllReservations(selectedDate.GetValueOrDefault(DateTime.Today));
         if (selectedServicesIds.Count > 0)
@@ -137,19 +138,6 @@ public class ReservationsController : Controller
         var guidList = guidArray.Select(x => Guid.Parse(x)).ToList();
 
         return guidList;
-    }
-
-    public IActionResult ShowAllReservations()
-    {
-        List<Reservation> reservations = GetAllReservations(DateTime.Today);
-        var model = new AllServicesViewModel
-        {
-            Reservations = reservations,
-            Services = _dbContext.Services.ToList(),
-            SelectedServices = new List<Guid>(),
-            SelectedDate = DateTime.Today
-        };
-        return View("AllReservations", model);
     }
 
     [HttpGet("edit-reservation/{id}", Name = "EditReservation")]
@@ -257,12 +245,37 @@ public class ReservationsController : Controller
 
     private string GetBadgeColor(State state)
     {
-        return "success";
+        switch (state)
+        {
+            case State.CONFIRMADA:
+                return "success";
+            case State.CANCELADA:
+                return "danger";
+            case State.DEMORADA:
+                return "warning";
+            case State.SIN_CONFIRMAR:
+                return "info";
+            default:
+                return "info";
+        }
+            
     }
 
     private string GetStateText(State state)
     {
-        return "Confirmada";
+        switch (state)
+        {
+            case State.CONFIRMADA:
+                return "Confirmada";
+            case State.CANCELADA:
+                return "Cancelada";
+            case State.DEMORADA:
+                return "Demorada";
+            case State.SIN_CONFIRMAR:
+                return "Sin confirmar";
+            default:
+                return "Sin confirmar";
+        }
     }
 
 
