@@ -15,6 +15,10 @@ html {
 
 body {
     margin-bottom: 60px;
+    background-color:floralwhite;
+    background-image: url("./holmesFondo1.png");
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 .form-control {

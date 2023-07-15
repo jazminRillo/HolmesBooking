@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace HolmesBooking;
 
@@ -16,9 +15,9 @@ public class Reservation
     [NotMapped]
     public TimeSpan? TimeSelected { get; set; }
     [NotMapped]
-    public List<SelectListItem>? CustomerOptions { get; internal set; }
+    public List<Customer>? CustomerOptions { get; internal set; }
     [NotMapped]
-    public List<SelectListItem>? ServiceOptions { get; internal set; }
+    public List<Service>? ServiceOptions { get; internal set; }
 
     public Reservation()
     {

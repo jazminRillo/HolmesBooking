@@ -3,117 +3,304 @@
     ViewData["Title"] = "Crear Reserva";
 }
 
-<h2>Crear Reserva</h2>
+<h2 class="font-weight-bold">Crear Reserva</h2>
 
-<form asp-action="SaveReservation" method="post">
-    <div class="form-group">
-        <label asp-for="Customer">Cliente</label>
-        <select class="form-control" asp-for="Customer!.Id" asp-items="Model.CustomerOptions">
-            <option value="">Seleccione un cliente</option>
-        </select>
+<div class="container">
+    <form asp-action="SaveReservation" method="post">
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="left-panel">
+                    <div class="mt-5">
+                        <div class="form-group">
+                            <select id="searchCustomer" class="selectpicker" data-live-search="true" data-show-subtext="true" asp-for="Customer.Id">
+                                <option value="">Seleccione un cliente</option>
+                                @foreach (var customer in Model.CustomerOptions)
+                                {
+                                    <option value="@customer.Id" data-subtext=@customer.Email>@customer.Name @customer.Lastname</option>
+                                }
+                            </select>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newCustomerModal">
+                                Nuevo
+                            </button>
+                        </div>
+                        <div id="customerDetails" class="card mt-3" style="display: none;">
+                            <div class="card-body">
+                                <h5 class="card-title" id="customerName"></h5>
+                                <p class="card-text" id="customerEmail"></p>
+                                <p class="card-text" id="customerPhoneNumber"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="right-panel">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <label class="font-weight-bold" for="Service_Id">Servicio</label>
+                                <select class="selectpicker" id="Service_Id" data-live-search="true" data-show-subtext="true" asp-for="Service.Id">
+                                    <option value="">Seleccione un servicio</option>
+                                    @foreach (var service in Model.ServiceOptions)
+                                    {
+                                        <option value="@service.Id">@service.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <label class="font-weight-bold" for="NumberDiners">Cantidad de Personas</label>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="btn-group" role="group" aria-label="Opciones de cantidad">
+                                            @for (int i = 1; i <= 6; i++)
+                                            {
+                                                <div class="mr-2">
+                                                    <button type="button" class="btn btn-primary rounded-circle btn-quantity" data-quantity="@i">
+                                                        <span class="bi bi-people"></span>
+                                                        @i
+                                                    </button>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="col-12 mt-2">
+                                        <input class="form-control input-small" type="number" id="NumberDiners" name="NumberDiners" min="1" maxlength="2" asp-for="NumberDiners">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="mt-3 row">
+                            <div class="mb-5 col-md-6">
+                                <label class="font-weight-bold" for="datepicker">Fecha</label>
+                                <div id="datepicker" class="datepicker"></div>
+                                <input type="hidden" id="Time" asp-for="Time" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="font-weight-bold">Horarios Disponibles</label>
+                                <div id="availableTimes" class="mt-3 mb-5 row radio-buttons"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold" asp-for="Note">Nota</label>
+                        <textarea class="form-control" asp-for="Note"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary active">Guardar</button>
+
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="newCustomerModal" tabindex="-1" role="dialog" aria-labelledby="newCustomerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newCustomerModalLabel">Nuevo Cliente</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="newCustomerForm">
+                    <input type="hidden" id="calledFromReservation" name="calledFromReservation" value="true" />
+                    <div class="form-group">
+                        <label for="name">Nombre</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastname">Apellido</label>
+                        <input type="text" class="form-control" id="lastname" name="lastname" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneNumber">Número de teléfono</label>
+                        <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="saveCustomer()">Guardar</button>
+            </div>
+        </div>
     </div>
+</div>
 
-    <div class="form-group">
-        <label asp-for="Service">Servicio</label>
-        <select class="form-control" asp-for="Service!.Id" asp-items="Model.ServiceOptions" id="Service_Id">
-            <option value="">Seleccione un servicio</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Time">Fecha y Hora</label>
-        <input class="form-control" asp-for="Time" id="Time" type="text" readonly />
-    </div>
-
-    <div class="form-group">
-        <label>Horarios Disponibles</label>
-        <select id="AvailableTimes" class="form-control" asp-for="TimeSelected"></select>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="NumberDiners">Cantidad de Personas</label>
-        <input class="form-control" asp-for="NumberDiners" />
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Note">Nota</label>
-        <textarea class="form-control" asp-for="Note"></textarea>
-    </div>
-
-    <button type="submit" class="btn btn-secondary active">Guardar</button>
-</form>
 
 @section Scripts {
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css" />
 
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js" integrity="sha512-LsnSViqQyaXpD4mBBdRYeP6sRwJiJveh2ZIbW41EBrNmKxgr/LFZIiWT6yr+nycvhvauz8c2nYMhrP80YhG7Cw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/locales/bootstrap-datepicker.es.min.js" integrity="sha512-5pjEAV8mgR98bRTcqwZ3An0MYSOleV04mwwYj2yw+7PBhFVf/0KcE+NEox0XrFiU5+x5t5qidmo5MgBkDD9hEw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css" integrity="sha512-34s5cpvaNG3BknEWSuOncX28vz97bRI59UnVtEEpFX536A7BtZSJHsDyFoCl8S7Dt2TPzcrCEoHBGeM4SUBDBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker3.min.css" integrity="sha512-aQb0/doxDGrw/OC7drNaJQkIKFu6eSWnVMAwPN64p6sZKeJ4QCDYL42Rumw2ZtL8DB9f66q4CnLIUnAw28dEbg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js" integrity="sha512-yDlE7vpGDP7o2eftkCiPZ+yuUyEcaBwoJoIhdXv71KZWugFqEphIS3PU60lEkFaz8RxaVsMpSvQxMBaKVwA5xg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/css/bootstrap-select.min.css" integrity="sha512-ARJR74swou2y0Q2V9k0GbzQ/5vJ2RBSoCWokg4zkfM29Fb3vZEQyv0iWBMW/yvKgyHSR/7D64pFMmU8nYmbRkg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        .custom-datepicker .ui-datepicker-week-end {
+        .caret {
             display: none;
+        }
+
+        .hide-card {
+            display: none;
+        }
+
+        .font-weight-bold {
+            font-style: oblique;
+            font-weight: bold;
+        }
+
+        .input-small {
+            width: 60px;
         }
     </style>
 
-    <script>$(function () {
+    <script>
+        $(document).ready(function () {
+            $('#newCustomerButton').click(function () {
+                $('#newCustomerModal').modal('show');
+            });
+            $('.selectpicker').selectpicker();
+        });
+
+        $('.btn-quantity').click(function () {
+            var quantity = $(this).data('quantity');
+            $('#NumberDiners').val(quantity);
+        });
+
+        $(function () {
             $('#Service_Id').change(function () {
-                var selectedServiceId = $(this).val();
-                $.ajax({
-                    url: '/services/get-service/' + selectedServiceId,
-                    type: 'GET',
-                    success: function (service) {
-                        if (service && service.schedule) {
-                            var schedule = service.schedule;
-                            var daysOfWeek = Object.keys(schedule).map(Number);
-                            $("#Time").datepicker("option", {
-                                beforeShowDay: function (date) {
-                                    var dayOfWeek = date.getDay();
-                                    return [daysOfWeek.includes(dayOfWeek) && schedule[dayOfWeek].length > 0];
+                initDatepicker();
+            });
+        });
+
+        function initDatepicker() {
+            $("#datepicker").datepicker('destroy');
+            $('#availableTimesCard').addClass('hide-card');
+            var selectedServiceId = $('#Service_Id').val();
+            $.ajax({
+                url: '/services/get-service/' + selectedServiceId,
+                type: 'GET',
+                success: function (service) {
+                    if (service && service.schedule) {
+                        var schedule = service.schedule;
+                        var daysOfWeek = Object.keys(schedule).map(Number);
+
+                        $("#datepicker").datepicker({
+                            format: "yyyy-mm-dd",
+                            todayHighlight: true,
+                            language: "es",
+                            beforeShowDay: function (date) {
+                                var dayOfWeek = date.getDay();
+                                console.log(dayOfWeek);
+                                return daysOfWeek.includes(dayOfWeek);
+                            }
+                        }).on('changeDate', function (e) {
+                            var dateText = e.format(0, 'yyyy-mm-dd');
+                            var selectedServiceId = $('#Service_Id').val();
+                            $('#Time').val(dateText);
+                            $.ajax({
+                                url: '/services/get-service/' + selectedServiceId,
+                                type: 'GET',
+                                success: function (service) {
+                                    if (service && service.schedule) {
+                                        var schedule = service.schedule;
+                                        var selectedDayOfWeek = getCustomDayOfWeek(new Date(dateText));
+                                        var availableTimes = schedule[selectedDayOfWeek];
+                                        var availableTimesContainer = $('#availableTimes');
+                                        availableTimesContainer.empty();
+
+                                        availableTimes.forEach(function (time) {
+                                            var formattedTime = time.substring(0, 5) + ' Hs';
+
+                                            var radio = $('<input>').attr({
+                                                type: 'radio',
+                                                name: 'timeSelected',
+                                                value: time
+                                            });
+
+                                            var label = $('<label>').text(formattedTime);
+
+                                            var column = $('<div>').addClass('col-sm-6 col-md-4');
+                                            var radioButton = $('<div>').addClass('radio-button');
+                                            radioButton.append(radio).append(label);
+                                            column.append(radioButton);
+
+                                            $('#availableTimes').append(column);
+                                        });
+                                        $('#availableTimesCard').removeClass('hide-card');
+                                    }
+                                },
+                                error: function () {
+                                    console.log('Error al obtener la información del servicio');
                                 }
                             });
-                        }
-                    },
-                    error: function () {
-                        console.log('Error al obtener la información del servicio');
+                        });
                     }
-                });
-
-                $("#Time").datepicker("setDate", null);
-            });
-
-            $("#Time").datepicker({
-                dateFormat: "yy-mm-dd",
-                showButtonPanel: true,
-                changeMonth: true,
-                changeYear: true,
-                showOtherMonths: true,
-                selectOtherMonths: true,
-                firstDay: 1,
-                beforeShowDay: $.datepicker.noWeekends,
-                onSelect: function (dateText) {
-                    var selectedServiceId = $('#Service_Id').val();
-                    $.ajax({
-                        url: '/services/get-service/' + selectedServiceId,
-                        type: 'GET',
-                        success: function (service) {
-                            if (service && service.schedule) {
-                                var schedule = service.schedule;
-                                var selectedDayOfWeek = getCustomDayOfWeek(new Date(dateText));
-                                var availableTimes = schedule[selectedDayOfWeek];
-                                $("#AvailableTimes").empty();
-
-                                availableTimes.forEach(function (time) {
-                                    var option = $("<option>").text(time).val(time);
-                                    $("#AvailableTimes").append(option);
-                                });
-                            }
-                        },
-                        error: function () {
-                            console.log('Error al obtener la información del servicio');
-                        }
-                    });
+                },
+                error: function () {
+                    console.log('Error al obtener la información del servicio');
                 }
-            }).addClass("custom-datepicker");
-});
+            });
+        }
+
+        $('#searchCustomer').change(function () {
+            var selectedCustomerId = $(this).val();
+            const customerOptions = @Html.Raw(Json.Serialize(Model.CustomerOptions));
+            const selectedCustomer = customerOptions.find(customer => customer.id === selectedCustomerId);
+            if (selectedCustomer) {
+                $('#customerName').text(selectedCustomer.name);
+                $('#customerEmail').text(selectedCustomer.email);
+                $('#customerPhoneNumber').text(selectedCustomer.phoneNumber);
+                $('#customerDetails').show();
+            } else {
+                $('#customerDetails').hide();
+            }
+        });
+
+        function saveCustomer() {
+            var form = document.getElementById('newCustomerForm');
+            var formData = new FormData(form);
+
+            fetch('/save-customer', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    $('#newCustomerModal').hide();
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    document.getElementById('customerName').textContent = data.name;
+                    document.getElementById('customerEmail').textContent = data.email;
+                    document.getElementById('customerPhoneNumber').textContent = data.phoneNumber;
+                    $('#customerDetails').show();
+
+                    var customerId = data.id;
+                    var mainModel = @Html.Raw(Json.Serialize(Model));
+                    mainModel.Customer = { Id: customerId };
+                })
+                .catch(error => {
+                    console.error('Error al guardar el cliente:', error);
+                });
+        }
+
         function getCustomDayOfWeek(date) {
             var dayOfWeek = date.getDay();
             if (dayOfWeek === 6) {
@@ -122,5 +309,5 @@
             return dayOfWeek + 1;
         }
     </script>
-
 }
+

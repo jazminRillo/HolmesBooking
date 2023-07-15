@@ -2,6 +2,7 @@ using System.Data;
 using System.Security.Cryptography;
 using System.Text;
 using HolmesBooking.DataBase;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +10,7 @@ namespace HolmesBooking.Controllers;
 
 [ApiController]
 [Route("customers")]
+[Authorize]
 public class CustomersController : Controller
 {
     private readonly ILogger<CustomersController> _logger;
@@ -31,46 +33,34 @@ public class CustomersController : Controller
     {
         try
         {
-            if (CustomerValidations.IsNull(customer))
-            {
-                return BadRequest("Cliente NULO.");
-            }
-
             var existingCustomer = _dbContext.Customers.FirstOrDefault(x => x.Email == customer.Email);
             if (existingCustomer == null)
             {
                 customer.Password = "google";
-                if (CustomerValidations.IsValid(_dbContext.Customers.ToList(), customer))
+                _dbContext.Customers.Add(customer);
+                byte[] passwordHash, passwordSalt;
+                CreatePasswordHash(customer.Password!, out passwordHash, out passwordSalt);
+                var newUser = new User
                 {
-                    _dbContext.Customers.Add(customer);
-                    byte[] passwordHash, passwordSalt;
-                    CreatePasswordHash(customer.Password!, out passwordHash, out passwordSalt);
-                    var newUser = new User
-                    {
-                        Username = customer.Email!,
-                        PasswordHash = passwordHash,
-                        PasswordSalt = passwordSalt,
-                        CustomerKey = customer.Id
-                    };
-                    _dbContext.Users.Add(newUser);
-                    var userRole = new UserRoles
-                    {
-                        User = newUser,
-                        Role = _dbContext.Roles.FirstOrDefault(x => x.Name == "User")!
-                    };
+                    Username = customer.Email!,
+                    PasswordHash = passwordHash,
+                    PasswordSalt = passwordSalt,
+                    CustomerKey = customer.Id
+                };
+                _dbContext.Users.Add(newUser);
+                var userRole = new UserRoles
+                {
+                    User = newUser,
+                    Role = _dbContext.Roles.FirstOrDefault(x => x.Name == "User")!
+                };
 
-                    _dbContext.UserRoles.Add(userRole);
-                    _dbContext.SaveChanges();
-                    return Ok(customer);
-                }
-                else
-                {
-                    return BadRequest("Cliente no válido.");
-                }
+                _dbContext.UserRoles.Add(userRole);
+                _dbContext.SaveChanges();
+                return Ok(_dbContext.Customers.FirstOrDefault(x => x.Email == customer.Email));
             }
             else
             {
-                return Ok(customer);
+                return Ok(existingCustomer);
             }
         }
         catch (Exception)
@@ -113,7 +103,7 @@ public class CustomersController : Controller
 
                     _dbContext.UserRoles.Add(userRole);
                     _dbContext.SaveChanges();
-                    if (User.Identity!.IsAuthenticated)
+                    if (User.Identity!.IsAuthenticated && !customer.CalledFromReservation.GetValueOrDefault())
                     {
                         return View("AllCustomers", _dbContext.Customers.ToList());
                     }
@@ -244,7 +234,7 @@ public class CustomersController : Controller
         return View("EditCustomer", customer);
     }
 
-    [HttpPost]
+    [HttpGet("delete-customer", Name = "DeleteCustomer")]
     public IActionResult DeleteCustomer(Guid id)
     {
         var customerToDelete = _dbContext.Customers.FirstOrDefault(x => x.Id == id);
@@ -253,7 +243,7 @@ public class CustomersController : Controller
             _dbContext.Customers.Remove(customerToDelete);
             _dbContext.SaveChanges();
         }
-        return View("AllCustomers", _dbContext.Customers.ToList());
+        return GetAllCustomers();
     }
 
     private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)

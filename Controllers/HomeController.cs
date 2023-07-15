@@ -17,10 +17,11 @@ public class HomeController : Controller
     {
         if (!User.Identity.IsAuthenticated)
         {
-            return RedirectToAction("LoginUser", "Users");
+            string loginUrl = Url.Action("LoginUser", "Users", new { returnUrl = Url.Action("Index", "Home") });
+            return Redirect(loginUrl);
         }
 
-        return View();
+        return RedirectToAction("FilteredReservations", "Reservations");
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

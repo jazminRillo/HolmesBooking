@@ -17,7 +17,7 @@
                     <select class="form-control" id="Customer" asp-for="Customer!.Id">
                         @foreach (var option in Model.CustomerOptions!)
                         {
-                            <option value="@option.Value" selected="@option.Selected">@option.Text</option>
+                            <option value="@option.Id" selected="@option.Name">@option.Name</option>
                         }
                     </select>
                 </div>
@@ -27,7 +27,7 @@
                     <select class="form-control" id="Service_Id" asp-for="Service!.Id">
                         @foreach (var option in Model.ServiceOptions!)
                         {
-                            <option value="@option.Value" selected="@option.Selected">@option.Text</option>
+                            <option value="@option.Id" selected="@option.Name">@option.Name</option>
                         }
                     </select>
                 </div>

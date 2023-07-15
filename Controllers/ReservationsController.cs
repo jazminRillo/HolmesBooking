@@ -1,17 +1,15 @@
-using System.Linq;
-using System.Runtime.Intrinsics.X86;
-using HolmesBooking;
 using HolmesBooking.DataBase;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
 
 namespace HolmesBooking.Controllers;
 
 [ApiController]
 [Route("reservations")]
+[Authorize]
 public class ReservationsController : Controller
 {
     private readonly ILogger<ServicesController> _logger;
@@ -150,13 +148,7 @@ public class ReservationsController : Controller
             return NotFound();
         }
 
-        List<SelectListItem> customerOptions = GetCustomerOptions();
-        List<SelectListItem> serviceOptions = GetServiceOptions();
-        reservation.CustomerOptions = customerOptions;
-        reservation.ServiceOptions = serviceOptions;
-        reservation.TimeSelected = reservation.Time?.TimeOfDay;
-        reservation.Time = reservation.Time?.Date;        
-        return View("EditReservation", reservation);
+        return View("CreateReservation", reservation);
     }
 
     [HttpGet("get-reservation/{reservationId}", Name = "GetReservationById")]
@@ -165,10 +157,8 @@ public class ReservationsController : Controller
         try
         {
             Reservation reservation = _dbContext.Reservations.Find(reservationId)!;
-            List<SelectListItem> customerOptions = GetCustomerOptions();
-            List<SelectListItem> serviceOptions = GetServiceOptions();
-            reservation.CustomerOptions = customerOptions;
-            reservation.ServiceOptions = serviceOptions;
+            reservation.CustomerOptions = _dbContext.Customers.ToList();
+            reservation.ServiceOptions = _dbContext.Services.ToList();
             reservation.TimeSelected = reservation.Time?.TimeOfDay;
             reservation.Time = reservation.Time?.Date;
             return reservation;
@@ -196,18 +186,10 @@ public class ReservationsController : Controller
         List<Customer> customers = _dbContext.Customers.ToList();
         List<Service> services = _dbContext.Services.ToList();
 
-        List<SelectListItem> customerOptions = customers
-            .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
-            .ToList();
-
-        List<SelectListItem> serviceOptions = services
-            .Select(s => new SelectListItem { Value = s.Id.ToString(), Text = s.Name })
-            .ToList();
-
         Reservation model = new Reservation
         {
-            CustomerOptions = customerOptions,
-            ServiceOptions = serviceOptions
+            CustomerOptions = customers,
+            ServiceOptions = services
         };
         return View("CreateReservation", model);
     }

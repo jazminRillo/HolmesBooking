@@ -19,9 +19,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Sistema de Reservas API", Version = "v1" });
 });
-builder.Services.AddSingleton<ServiceMocks>();
-builder.Services.AddSingleton<CustomerMocks>();
-builder.Services.AddSingleton<ReservationMocks>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
@@ -48,7 +46,9 @@ builder.Services.AddAuthentication(options =>
 }).AddCookie(options =>
 {
     options.Cookie.Name = "booking";
+    options.LoginPath = "/users";
 });
+
 
 var app = builder.Build();
 

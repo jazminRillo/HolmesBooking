@@ -12,6 +12,8 @@ public class Customer
     public string? PhoneNumber { get; set; }
     [NotMapped]
     public string? Password { get; set; }
+    [NotMapped]
+    public bool? CalledFromReservation { get; set; }
     public Classification? Classification { get; set; }
 
     public Customer()

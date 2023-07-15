@@ -1,6 +1,7 @@
 ﻿using HolmesBooking.DataBase;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,8 +21,9 @@ public class UsersController : Controller
     }
 
     [HttpGet]
-    public IActionResult LoginUser()
+    public IActionResult LoginUser(string returnUrl = null)
     {
+        TempData["ReturnUrl"] = returnUrl;
         return View("LoginUser", new LoginViewModel { CalledFromAdmin = true });
     }
 
@@ -60,6 +62,12 @@ public class UsersController : Controller
 
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
+        string returnUrl = TempData["ReturnUrl"] as string;
+
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+        {
+            return Redirect(returnUrl);
+        }
         return RedirectToAction("Index", "Home");
     }
 
