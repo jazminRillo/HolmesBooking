@@ -67,7 +67,11 @@ public class ServicesController : Controller
         try
         {
             List<Service> services = _dbContext.Services.ToList();
-            return View("AllServices", services);
+            if (User.Identity!.IsAuthenticated)
+            {
+                return View("AllServices", services);
+            }
+            return Ok(services);
         }
         catch (Exception)
         {

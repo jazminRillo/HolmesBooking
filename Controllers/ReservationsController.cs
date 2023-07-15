@@ -148,7 +148,7 @@ public class ReservationsController : Controller
             return NotFound();
         }
 
-        return View("CreateReservation", reservation);
+        return View("EditReservation", reservation);
     }
 
     [HttpGet("get-reservation/{reservationId}", Name = "GetReservationById")]
@@ -159,6 +159,8 @@ public class ReservationsController : Controller
             Reservation reservation = _dbContext.Reservations.Find(reservationId)!;
             reservation.CustomerOptions = _dbContext.Customers.ToList();
             reservation.ServiceOptions = _dbContext.Services.ToList();
+            reservation.Customer = _dbContext.Customers.Find(reservation.Customer.Id);
+            reservation.Service = _dbContext.Services.Find(reservation.Service.Id);
             reservation.TimeSelected = reservation.Time?.TimeOfDay;
             reservation.Time = reservation.Time?.Date;
             return reservation;
