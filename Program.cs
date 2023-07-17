@@ -1,5 +1,6 @@
 ﻿using HolmesBooking;
 using HolmesBooking.DataBase;
+using HolmesBooking.Notifications;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -49,6 +50,8 @@ builder.Services.AddAuthentication(options =>
     options.LoginPath = "/users";
 });
 
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 
 var app = builder.Build();
 

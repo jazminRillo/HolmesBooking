@@ -29,9 +29,10 @@
             <div class="right-panel">
                 <div class="accordion accordion-flush" id="customers">
                     @foreach (var customer in Model.Customers)
-                    {
-                        var accordionId = $"accordion-{customer.Id}";
-                        var collapseId = $"collapse-{customer.Id}";
+                        {
+                            var statusCount = Model.ReservationsByState[customer.Id!.Value];
+                            var accordionId = $"accordion-{customer.Id}";
+                            var collapseId = $"collapse-{customer.Id}";
                         <div class="card">
                             <h2 class="card-header d-flex justify-content-between" id="@accordionId">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
@@ -66,11 +67,62 @@
                             </h2>
                             <div id="@collapseId" class="collapse" aria-labelledby="@accordionId" data-bs-parent="#customers">
                                 <div class="card-body">
-                                    <div>
+                                    <div class="ml-auto ms-2">
+                                        <span>Reservas:</span>
+                                        @foreach (var kvp in statusCount)
+                                        {
+                                            var state = kvp.Key;
+                                            var count = kvp.Value;
+
+                                            <span class="badge rounded-pill bg-dark">
+                                                <i class="bi bi-calendar-check"></i> @state.ToString(): @count
+                                            </span>
+                                        }
+                                    </div>
+                                    <div class="ml-auto ms-2 mt-2">
                                         <p>Email: @customer!.Email</p>
                                         <p>Tel: @customer!.PhoneNumber</p>
                                         <a href="@Url.Action("EditCustomer", "Customers", new { id = customer.Id })" class="btn btn-primary">Editar</a>
                                         <a href="@Url.Action("DeleteCustomer", "Customers", new { id = customer.Id })" class="btn btn-danger">Eliminar</a>
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reservationHistoryModal-@customer!.Id">
+                                            Historial de Reservas
+                                        </button>
+                                        <div class="modal fade" id="reservationHistoryModal-@customer!.Id" tabindex="-1" aria-labelledby="reservationHistoryModalLabel-@customer!.Id" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-scrollable">
+                                                <div class="modal-content">
+                                                    <div class="modal-body">
+                                                        <div class="container-fluid">
+                                                            <div class="row">
+                                                                <div class="col">
+                                                                    <h5>Historial de Reservas</h5>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                @foreach (var reservation in customer.Reservations!)
+                                                                {
+                                                                    <div class="col-12 mb-3">
+                                                                        <div class="card">
+                                                                            <div class="card-body">
+                                                                                <h6 class="card-title">Fecha: @reservation.Time</h6>
+                                                                                <p class="card-text">Servicio: @reservation.Service!.Name</p>
+                                                                                <p class="card-text">Estado: @reservation.State</p>
+                                                                                <p class="card-text">Personas: @reservation.NumberDiners</p>
+
+                                                                                @if (reservation.Time > DateTime.Today)
+                                                                                {
+                                                                                    <a href="@Url.Action("EditReservation", "Reservations", new { id = reservation.Id })" class="btn btn-primary">Editar</a>
+                                                                                }
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>

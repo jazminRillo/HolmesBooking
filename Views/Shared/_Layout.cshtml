@@ -46,12 +46,34 @@
                                     <i class="bi bi-calendar-check"></i> Reservas
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="notificationsToggle" data-bs-toggle="modal" data-bs-target="#notificationsModal">
+                                    <i class="bi bi-bell-fill"></i>
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </div>
             </nav>
         }
     </header>
+
+    <div class="modal fade" id="notificationsModal" role="dialog" tabindex="-1" aria-labelledby="notificationsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationsModalLabel">Notificaciones</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="notificationContent"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="container">
         <main role="main" class="pb-3">
@@ -64,6 +86,40 @@
             &copy; 2023 - HolmesBrewery
         </div>
     </footer>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var notificationMessage = '@(TempData["NotificationMessage"] as string)';
+
+        if (notificationMessage) {
+            var notificationsIcon = document.getElementById('notificationsToggle');
+            notificationsIcon.classList.add('show-alert');
+
+            document.getElementById('notificationContent').textContent = notificationMessage;
+
+            var notificationsModal = new bootstrap.Modal(document.getElementById('notificationsModal'));
+            notificationsModal.show();
+
+            if (Notification.permission === 'granted') {
+                showNotification(notificationMessage);
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission(function (permission) {
+                    if (permission === 'granted') {
+                        showNotification(notificationMessage);
+                    }
+                });
+            }
+        }
+
+        function showNotification(message) {
+            var options = {
+                body: message,
+                icon: 'notification_icon.png'
+            };
+
+            var notification = new Notification('Notificación', options);
+        }
+    });
+    </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

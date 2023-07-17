@@ -8,7 +8,6 @@ namespace HolmesBooking.Controllers;
 
 [ApiController]
 [Route("services")]
-[Authorize]
 public class ServicesController : Controller
 {
     private readonly HolmeBookingDbContext _dbContext;
@@ -86,6 +85,7 @@ public class ServicesController : Controller
     }
 
     [HttpGet("edit-service/{id}", Name = "EditService")]
+    [Authorize]
     public IActionResult EditService(Guid id)
     {
         Service service = GetServiceById(id);
@@ -144,12 +144,14 @@ public class ServicesController : Controller
     }
 
     [HttpGet("create-new-service", Name = "CreateNewService")]
+    [Authorize]
     public IActionResult CreateNewService()
     {
         return View("CreateService", new Service());
     }
 
     [HttpPost("create-service", Name = "CreateService")]
+    [Authorize]
     public IActionResult CreateService([FromForm] Service service)
     {
         if (ModelState.IsValid)

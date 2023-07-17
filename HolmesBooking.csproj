@@ -16,17 +16,20 @@
     <PackageReference Include="Bootstrap.Datepicker" Version="1.8.0.1" />
     <PackageReference Include="Bootstrap.v3.Datetimepicker.CSS" Version="4.17.49" />
     <PackageReference Include="TinyMCE" Version="6.5.1" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.61.0" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="Views\Services\" />
     <None Remove="Views\Customers\" />
     <None Remove="Views\Users\" />
+    <None Remove="Notifications\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Services\" />
     <Folder Include="Views\Customers\" />
     <Folder Include="Views\Users\" />
+    <Folder Include="Notifications\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Views\Home\EditServiceOld.cshtml" />

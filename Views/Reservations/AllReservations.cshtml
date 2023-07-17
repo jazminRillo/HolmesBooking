@@ -104,6 +104,8 @@
                                     <p>Servicio: @reservation.Service!.Name</p>
                                     <p>Email: @reservation.Customer!.Email</p>
                                     <p>Tel: @reservation.Customer!.PhoneNumber</p>
+                                    <p>Menores: @reservation.NumberKids</p>
+                                    <p>Celíacos: @reservation.NumberCeliac</p>
                                     <p>Nota: @reservation.Note</p>
                                     <a href="@Url.Action("EditReservation", "Reservations", new { id = reservation.Id })" class="btn btn-primary">Editar</a>
                                 </div>

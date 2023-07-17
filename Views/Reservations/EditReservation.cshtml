@@ -5,15 +5,16 @@
     string timeString = timeValue.ToString("yyyy-MM-dd");
 }
 
-<h2 class="font-weight-bold">Editer Reserva</h2>
+<h2 class="font-weight-bold">Editar Reserva</h2>
 
-<div class="container">
+<div class="container mt-5">
     <form asp-action="SaveReservation" method="post">
         <input type="hidden" id="Id" asp-for="Id" />
         <div class="row">
             <div class="col-lg-4">
                 <div class="left-panel">
-                    <div class="mt-5">
+                    <div class="">
+                        <label class="font-weight-bold" for="Service_Id">Cliente</label>
                         <div id="customerDetails" class="card mt-3">
                             <div class="card-body">
                                 <input type="hidden" id="Customer.Id" asp-for="Customer.Id" />
@@ -79,7 +80,17 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="font-weight-bold" asp-for="Note">Nota</label>
+                        <label class="font-weight-bold" asp-for="NumberKids">Cantidad de Menores</label>
+                        <input class="form-control input-small" type="number" id="NumberKids" name="NumberKids" min="0" maxlength="2" asp-for="NumberKids">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold" asp-for="NumberCeliac">Cantidad de Celiacos</label>
+                        <input class="form-control input-small" type="number" id="NumberCeliac" name="NumberCeliac" min="0" maxlength="2" asp-for="NumberCeliac">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold" asp-for="Note">Notas adicionales, alergias, etc</label>
                         <textarea class="form-control" asp-for="Note"></textarea>
                     </div>
 
@@ -198,7 +209,7 @@
                                 if (date.getMonth() == (new Date()).getMonth()) {
                                     var timeValue = $('#Time').val();
                                     var dateParts = timeValue.split('/');
-                                    if (date.getDate() === Number(dateParts[0]))
+                                    if (date.getDate() === Number(dateParts[1]))
                                         return {
                                             tooltip: 'Día Seleccionado',
                                             classes: 'active'

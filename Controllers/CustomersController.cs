@@ -5,12 +5,12 @@ using HolmesBooking.DataBase;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace HolmesBooking.Controllers;
 
 [ApiController]
 [Route("customers")]
-[Authorize]
 public class CustomersController : Controller
 {
     private readonly ILogger<CustomersController> _logger;
@@ -21,6 +21,7 @@ public class CustomersController : Controller
         _dbContext = dbContext;
     }
 
+    [Authorize]
     [HttpGet("create-new-customer", Name = "CreateCustomer")]
     public IActionResult CreateCustomer()
     {
@@ -159,11 +160,13 @@ public class CustomersController : Controller
 
     [EnableCors("_myAllowSpecificOrigins")]
     [HttpGet("/all-customers", Name = "GetAllCustomers")]
+    [Authorize]
     public IActionResult GetAllCustomers(int page = 1, int pageSize = 8, string? search = "")
     {
         try
         {
             var allCustomers = _dbContext.Customers.ToList();
+            var reservationsByState = new Dictionary<Guid, Dictionary<State, int>>();
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -180,24 +183,42 @@ public class CustomersController : Controller
                 .Take(pageSize)
                 .ToList();
 
+            foreach (var customer in customersToDisplay)
+            {
+                customer.Reservations = _dbContext.Reservations
+                    .Where(r => r.Customer!.Id == customer.Id)
+                    .OrderByDescending(r => r.Time)
+                    .Include(r => r.Service)
+                    .ToList();
+
+                var statusCount = customer.Reservations
+                                    .Where(r => r.State != null)
+                                    .GroupBy(r => r.State)
+                                    .ToDictionary(g => g.Key ?? State.SIN_CONFIRMAR, g => g.Count());
+                                        reservationsByState[customer.Id!.Value] = statusCount;
+            }
+
             var totalPages = (int)Math.Ceiling((double)totalCustomers / pageSize);
 
             var viewModel = new AllCustomersViewModel
             {
                 Customers = customersToDisplay,
                 Page = page,
-                TotalPages = totalPages
+                TotalPages = totalPages,
+                ReservationsByState = reservationsByState
             };
 
             return View("AllCustomers", viewModel);
         }
-        catch (Exception)
+        catch (Exception error)
         {
+            var a = error;
             return StatusCode(500);
         }
     }
 
     [HttpGet("edit-customer/{id}", Name = "EditCustomer")]
+    [Authorize]
     public IActionResult EditCustomer(Guid id)
     {
         Customer customer = GetCustomerById(id);
@@ -224,6 +245,7 @@ public class CustomersController : Controller
     }
 
     [HttpPost("update-customer", Name = "UpdateCustomer")]
+    [Authorize]
     public IActionResult UpdateService(Customer customer)
     {
         if (ModelState.IsValid)

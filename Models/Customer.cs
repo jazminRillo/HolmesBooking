@@ -14,6 +14,8 @@ public class Customer
     public string? Password { get; set; }
     [NotMapped]
     public bool? CalledFromReservation { get; set; }
+    [NotMapped]
+    public List<Reservation>? Reservations { get; set; }
     public Classification? Classification { get; set; }
 
     public Customer()

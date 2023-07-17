@@ -47,3 +47,16 @@ button.accept-policy {
   line-height: 60px;
 }
 
+.show-alert {
+    position: relative;
+}
+
+    .show-alert::after {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background-color: red;
+        border-radius: 50%;
+    }
+

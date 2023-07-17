@@ -3,7 +3,7 @@
     ViewData["Title"] = "Crear Reserva";
 }
 
-<h2 class="font-weight-bold">Crear Reserva</h2>
+<h2 class="font-weight-bold">Nueva Reserva</h2>
 
 <div class="container">
     <form asp-action="SaveReservation" method="post">
@@ -87,7 +87,17 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="font-weight-bold" asp-for="Note">Nota</label>
+                        <label class="font-weight-bold" asp-for="NumberKids">Cantidad de Menores</label>
+                        <input class="form-control input-small" type="number" id="NumberKids" name="NumberKids" min="0" maxlength="2" asp-for="NumberKids">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold" asp-for="NumberCeliac">Cantidad de Celiacos</label>
+                        <input class="form-control input-small" type="number" id="NumberCeliac" name="NumberCeliac" min="0" maxlength="2" asp-for="NumberCeliac">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold" asp-for="Note">Notas adicionales, alergias, etc</label>
                         <textarea class="form-control" asp-for="Note"></textarea>
                     </div>
 

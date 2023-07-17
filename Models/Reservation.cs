@@ -12,6 +12,8 @@ public class Reservation
     public State? State { get; set; }
     public int? NumberDiners { get; set; }
     public string? Note { get; set; }
+    public int? NumberKids { get; set; }
+    public int? NumberCeliac { get; set; }
     [NotMapped]
     public TimeSpan? TimeSelected { get; set; }
     [NotMapped]

@@ -2,23 +2,23 @@ using HolmesBooking.DataBase;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace HolmesBooking.Controllers;
 
 [ApiController]
 [Route("reservations")]
-[Authorize]
 public class ReservationsController : Controller
 {
     private readonly ILogger<ServicesController> _logger;
     private readonly HolmeBookingDbContext _dbContext;
+    private readonly IEmailService _emailService;
 
-    public ReservationsController(ILogger<ServicesController> logger, HolmeBookingDbContext dbContext)
+    public ReservationsController(ILogger<ServicesController> logger, HolmeBookingDbContext dbContext, IEmailService emailService)
     {
         _logger = logger;
         _dbContext = dbContext;
+        _emailService = emailService;
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
@@ -42,8 +42,17 @@ public class ReservationsController : Controller
                     TimeSpan time = reservation.TimeSelected!.Value;
                     DateTime combinedDateTime = new(date.Year, date.Month, date.Day, time.Hours, time.Minutes, time.Seconds);
                     reservation.Time = combinedDateTime;
+                    reservation.State = State.CONFIRMADA;
                     _dbContext.Reservations.Add(reservation);
                     _dbContext.SaveChanges();
+                    if (!User.Identity!.IsAuthenticated)
+                    {
+                        var message = "Nueva reserva para el dia: " + reservation.Time!.Value.ToLongDateString() + ", " + reservation.TimeSelected + " Hs. Para " + reservation.NumberDiners + " personas a nombre de: " + reservation.Customer!.Name;
+                        TempData["NotificationMessage"] = message;
+                        var recipientEmail = "holmesbrewery@gmail.com";
+                        var subject = "Nueva Reserva";
+                        _emailService.SendReservationConfirmationEmail(recipientEmail, subject, message);
+                    }
                     return FilteredReservations(null, null);
                 }
                 else
@@ -65,6 +74,8 @@ public class ReservationsController : Controller
                     existingReservation.NumberDiners = reservation.NumberDiners;
                     existingReservation.Note = reservation.Note;
                     existingReservation.State = reservation.State;
+                    existingReservation.NumberKids = reservation.NumberKids;
+                    existingReservation.NumberCeliac = reservation.NumberCeliac;
                     _dbContext.SaveChanges();
                     return FilteredReservations(null, null);
                 }
@@ -108,6 +119,7 @@ public class ReservationsController : Controller
     }
 
     [HttpGet("/filtered-reservations", Name = "FilteredReservations")]
+    [Authorize]
     public IActionResult FilteredReservations([FromQuery] string? selectedServices, DateTime? selectedDate)
     {
         if (selectedDate == null) selectedDate = DateTime.Today;
@@ -139,6 +151,7 @@ public class ReservationsController : Controller
     }
 
     [HttpGet("edit-reservation/{id}", Name = "EditReservation")]
+    [Authorize]
     public IActionResult EditReservation(Guid id)
     {
         Reservation reservation = GetReservationById(id);
@@ -172,6 +185,7 @@ public class ReservationsController : Controller
     }
 
     [HttpPost("update-reservation", Name = "UpdateReservation")]
+    [Authorize]
     public IActionResult UpdateService(Reservation reservation)
     {
         if (ModelState.IsValid)
@@ -183,6 +197,7 @@ public class ReservationsController : Controller
     }
 
     [HttpGet("create-new-reservation", Name = "CreateReservation")]
+    [Authorize]
     public IActionResult CreateReservation()
     {
         List<Customer> customers = _dbContext.Customers.ToList();
@@ -260,26 +275,5 @@ public class ReservationsController : Controller
             default:
                 return "Sin confirmar";
         }
-    }
-
-
-    private List<SelectListItem> GetCustomerOptions()
-    {
-        var customers = _dbContext.Customers.ToList();
-        return customers.Select(c => new SelectListItem
-        {
-            Value = c.Id.ToString(),
-            Text = $"{c.Name} {c.Lastname}"
-        }).ToList();
-    }
-
-    private List<SelectListItem> GetServiceOptions()
-    {
-        var services = _dbContext.Services.ToList();
-        return services.Select(s => new SelectListItem
-        {
-            Value = s.Id.ToString(),
-            Text = s.Name
-        }).ToList();
     }
 }
