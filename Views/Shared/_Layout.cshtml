@@ -16,10 +16,12 @@
 <body>
     <header>
         @if (userLoggedIn)
-        {
+            {
             <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
                 <div class="container-fluid">
-                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">HolmesBooking</a>
+                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-house-fill"></i>
+                    </a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                             aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
@@ -27,13 +29,8 @@
                     <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                         <ul class="navbar-nav flex-grow-1">
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Users" asp-action="Logout">
-                                    <i class="bi bi-box-arrow-right"></i> Cerrar sesión
-                                </a>
-                            </li>
-                            <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Services" asp-action="GetAllServices">
-                                    <i class="bi bi-calendar-event"></i> Servicios
+                                    <i class="bi bi-card-checklist"></i> Servicios
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -43,19 +40,31 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Reservations" asp-action="FilteredReservations">
-                                    <i class="bi bi-calendar-check"></i> Reservas
+                                    <i class="bi bi-calendar-plus"></i> Reservas
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Reservations" asp-action="FullCalendar">
+                                    <i class="bi bi-calendar4-event"></i> Calendario
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="navbar-nav flex-grow-2">
+                            <li class="nav-item">
                                 <a class="nav-link" id="notificationsToggle" data-bs-toggle="modal" data-bs-target="#notificationsModal">
                                     <i class="bi bi-bell-fill"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tooltip" data-bs-title="Cerrar Sesión" asp-controller="Users" asp-action="Logout">
+                                    <i class="bi bi-box-arrow-right"></i>
                                 </a>
                             </li>
                         </ul>
                     </div>
                 </div>
             </nav>
-        }
+            }
     </header>
 
     <div class="modal fade" id="notificationsModal" role="dialog" tabindex="-1" aria-labelledby="notificationsModalLabel" aria-hidden="true">
@@ -126,4 +135,7 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+
+
 

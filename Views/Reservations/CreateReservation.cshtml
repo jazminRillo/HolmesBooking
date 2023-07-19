@@ -217,8 +217,8 @@
                             todayHighlight: true,
                             language: "es",
                             beforeShowDay: function (date) {
+                                if (date < Date.now()) return false;
                                 var dayOfWeek = date.getDay();
-                                console.log(dayOfWeek);
                                 return daysOfWeek.includes(dayOfWeek);
                             }
                         }).on('changeDate', function (e) {

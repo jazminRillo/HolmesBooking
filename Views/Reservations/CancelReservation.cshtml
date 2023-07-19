@@ -1,0 +1,56 @@
+﻿@model Reservation
+@{
+    ViewData["Title"] = "Reserva Cancelada";
+    DateTime timeValue = Model.Time!.Value;
+    string timeString = timeValue.ToLongDateString();
+}
+<style>
+    /* CSS personalizado para centrar verticalmente */
+    body, html {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    .login-form {
+        max-width: 400px;
+        padding: 20px;
+        background-color: #f7f7f7;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .text-center {
+        margin-top: 15px;
+    }
+</style>
+
+<div class="container">
+    <div class="login-form">
+        <h2 class="text-center">Cancelación confirmada</h2>
+
+        <p>
+            <strong>Su reserva ha sido cancelada.</strong>
+        </p>
+        <p>Fecha: @timeString</p>
+        <p>Hora: @Model.TimeSelected</p>
+        <p>Personas: @Model.NumberDiners</p>
+        <p>Servicio: @Model.Service!.Name</p>
+        <p>Cliente: @Model.Customer!.Name @Model.Customer!.Lastname</p>
+        <p>Desea hacer una nueva reserva? <a href='http://client.holmesbooking.com/'>Reservar</a></p>
+    </div>
+</div>
+
+
+

@@ -1,6 +1,6 @@
 ﻿@model LoginViewModel
     @{
-        var error = Context.Request.Query["error"];
+        var error = Model.Error!;
     }
     <style>
         /* CSS personalizado para centrar verticalmente */

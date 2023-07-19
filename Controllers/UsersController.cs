@@ -21,7 +21,7 @@ public class UsersController : Controller
     }
 
     [HttpGet]
-    public IActionResult LoginUser(string returnUrl = null)
+    public IActionResult LoginUser(string? returnUrl = null)
     {
         TempData["ReturnUrl"] = returnUrl;
         return View("LoginUser", new LoginViewModel { CalledFromAdmin = true });
@@ -39,10 +39,10 @@ public class UsersController : Controller
         if (user == null ||
             !VerifyPasswordHash(login.Password, user.PasswordHash, user.PasswordSalt))
         {
-            return RedirectToAction("LoginUser", new { error = "Credenciales inválidas" });
+            return View("LoginUser", new LoginViewModel { CalledFromAdmin = true, Error = "Credenciales inválidas" });
         }
 
-        if (!login.CalledFromAdmin)
+        if (!login.CalledFromAdmin.GetValueOrDefault())
         {
             var customer = _dbContext.Customers.Find(user.CustomerKey);
             return Ok(customer);
@@ -50,7 +50,7 @@ public class UsersController : Controller
 
         if (user.UserRoles!.FirstOrDefault(x => x.Role.Name == "Admin") == null)
         {
-            return RedirectToAction("LoginUser", new { error = "El usuario no tiene permisos" });
+            return View("LoginUser", new LoginViewModel { CalledFromAdmin = true, Error = "El usuario no tiene permisos" });
         }
 
         var claims = new List<Claim>

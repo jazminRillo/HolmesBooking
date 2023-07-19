@@ -1,3 +1,4 @@
+using System.Globalization;
 using HolmesBooking.DataBase;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -45,6 +46,7 @@ public class ReservationsController : Controller
                     reservation.State = State.CONFIRMADA;
                     _dbContext.Reservations.Add(reservation);
                     _dbContext.SaveChanges();
+                    SendConfirmation(reservation);
                     if (!User.Identity!.IsAuthenticated)
                     {
                         var message = "Nueva reserva para el dia: " + reservation.Time!.Value.ToLongDateString() + ", " + reservation.TimeSelected + " Hs. Para " + reservation.NumberDiners + " personas a nombre de: " + reservation.Customer!.Name;
@@ -77,7 +79,11 @@ public class ReservationsController : Controller
                     existingReservation.NumberKids = reservation.NumberKids;
                     existingReservation.NumberCeliac = reservation.NumberCeliac;
                     _dbContext.SaveChanges();
-                    return FilteredReservations(null, null);
+                    if (User.Identity!.IsAuthenticated)
+                    {
+                        return FilteredReservations(null, null);
+                    }
+                    return Ok(existingReservation);
                 }
                 else
                 {
@@ -91,6 +97,37 @@ public class ReservationsController : Controller
             throw;
             // Handle error related with DB (?).
         }
+    }
+
+    private void SendConfirmation(Reservation reservation)
+    {
+        var culture = new CultureInfo("es-ES");
+        var reservationDate = reservation.Time!.Value.ToString("D", culture);
+        var reservationTime = reservation.TimeSelected;
+        var numberOfDiners = reservation.NumberDiners;
+        var customerName = reservation.Customer!.Name;
+        var customerLastName = reservation.Customer!.Lastname;
+        var serviceName = reservation.Service!.Name;
+        var serviceDescription = reservation.Service!.Description;
+
+        var editLink = "http://client.holmesbooking.com/";
+        var cancelLink = "https://holmesbooking.com/reservations/cancel-reservation/" + reservation.Id;
+
+        var message = $"<html>" +
+                      $"<body>" +
+                      $"<h2>Confirmación de su reserva en Holmes</h2>" +
+                      $"<p>Fecha de reserva: {reservationDate}, {reservationTime} Hs.</p>" +
+                      $"<p>Personas: {numberOfDiners}</p>" +
+                      $"<p>Nombre del cliente: {customerName} {customerLastName}</p>" +
+                      $"<p>Servicio seleccionado: {serviceName}</p>" +
+                      $"<p>Descripción del servicio: {serviceDescription}</p>" +
+                      $"<p>Para editar su reservas puede ingresar a <a href='{editLink}'>Ver mis reservas</a></p>" +
+                      $"<p>Si desea cancelar simplemente haga click en este link <a href='{cancelLink}'>Cancelar reserva</a></p>" +
+                      $"</body>" +
+                      $"</html>";
+        var recipientEmail = reservation.Customer.Email!;
+        var subject = "Confirmación Reserva en Holmes";
+        _emailService.SendReservationConfirmationEmail(recipientEmail, subject, message);
     }
 
     // This endpoint works but it is not updated when you post a new reservation.
@@ -116,6 +153,45 @@ public class ReservationsController : Controller
         {
             throw;
         }
+    }
+
+    [HttpGet("/calendarreservations", Name = "CalendarReservations")]
+    public IActionResult CalendarReservations()
+    {
+        try
+        {
+            var reservations = _dbContext.Reservations
+                                    .Include(r => r.Customer)
+                                    .Include(r => r.Service)
+                                    .OrderBy(x => x.Time)
+                                    .Select(x => new
+                                    {
+                                        reservationId = x.Id.GetValueOrDefault(),
+                                        title = x.Service!.Name + "-" + x.Customer!.Name + "-" + x.NumberDiners,
+                                        start = x.Time,
+                                        end = x.Time 
+                                    })
+                                    .ToList();
+
+            return Ok(reservations);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+
+    [HttpGet("customer-reservations/{customerId}", Name = "CustomerReservations")]
+    public IActionResult CustomerReservations(Guid customerId)
+    {
+        List<Reservation> reservations = _dbContext.Reservations
+                                    .Include(r => r.Customer)
+                                    .Include(r => r.Service)
+                                    .OrderBy(x => x.Time)
+                                    .Where(x => x.Customer!.Id == customerId)
+                                    .ToList();
+        return Ok(reservations);
     }
 
     [HttpGet("/filtered-reservations", Name = "FilteredReservations")]
@@ -148,6 +224,25 @@ public class ReservationsController : Controller
         var guidList = guidArray.Select(x => Guid.Parse(x)).ToList();
 
         return guidList;
+    }
+
+    [HttpGet("cancel-reservation/{id}", Name = "CancelReservation")]
+    public IActionResult CancelReservation(Guid id)
+    {
+        Reservation reservation = GetReservationById(id);
+
+        if (reservation == null)
+        {
+            return NotFound();
+        }
+        reservation.State = State.CANCELADA;
+        DateTime date = reservation.Time!.Value;
+        TimeSpan time = reservation.TimeSelected!.Value;
+        DateTime combinedDateTime = new(date.Year, date.Month, date.Day, time.Hours, time.Minutes, time.Seconds);
+        reservation.Time = combinedDateTime;
+        _dbContext.Update(reservation);
+        _dbContext.SaveChanges();
+        return View("CancelReservation", reservation);
     }
 
     [HttpGet("edit-reservation/{id}", Name = "EditReservation")]
@@ -209,6 +304,13 @@ public class ReservationsController : Controller
             ServiceOptions = services
         };
         return View("CreateReservation", model);
+    }
+
+    [HttpGet("fullcalendar", Name = "FullCalendar")]
+    [Authorize]
+    public IActionResult FullCalendar()
+    {
+      return View("FullCalendar");
     }
 
     [HttpPost("ChangeReservationState", Name = "ChangeReservationState")]

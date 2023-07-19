@@ -20,6 +20,7 @@ public class EmailService : IEmailService
         emailMessage.From = new MailAddress("reservas@holmesbooking.com", "Reservas Holmes");
         emailMessage.To.Add(new MailAddress(recipientEmail, "Reservas"));
         emailMessage.Subject = subject;
+        emailMessage.IsBodyHtml = true;
         emailMessage.Body = message;
 
         SmtpClient smtp = new SmtpClient(_emailSettings.SmtpServer);

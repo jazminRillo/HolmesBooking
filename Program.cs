@@ -26,8 +26,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                      policy =>
                      {
-                         policy.WithOrigins("http://holmessoftware-001-site2.atempurl.com",
-                                            "http://localhost:3000")
+                         policy.WithOrigins(
+                             "http://holmessoftware-001-site2.atempurl.com",
+                             "http://client.holmesbooking.com",
+                             "http://localhost:3000")
                                .AllowAnyHeader()
                                .AllowAnyMethod();
                      });

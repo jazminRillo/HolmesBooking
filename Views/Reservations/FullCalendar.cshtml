@@ -1,0 +1,63 @@
+﻿@{
+    ViewData["Title"] = "Calendario";
+}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div id="calendar"></div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <style>
+        a {
+            color: black; 
+            text-decoration: underline;
+        }
+        .fc .fc-daygrid-day-number {
+            cursor: pointer;
+        }
+    </style>
+    
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <script>document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                themeSystem: 'bootstrap',
+                locale: 'es',
+                editable: true,
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                eventClick: function (info) {
+                    var eventId = info.event.id;
+                    window.location.href = '@Url.Action("edit-reservation", "Reservations")' + '/' + eventId;
+                },
+                dateClick: function (info) {
+                                var selectedDate = info.dateStr;
+                                window.location.href = '@Url.RouteUrl("FilteredReservations")' + '?selectedDate=' + selectedDate;
+                            }
+                        });
+            calendar.render();
+            $.ajax({
+                url: '@Url.RouteUrl("CalendarReservations")',
+                method: 'GET',
+                success: function (reservations) {
+                    reservations.forEach(function (reservation) {
+                        calendar.addEvent({
+                            id: reservation.reservationId,
+                            title: reservation.title,
+                            start: reservation.start,
+                            end: reservation.end
+                        });
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        });</script>
+}
