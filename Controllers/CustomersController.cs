@@ -106,7 +106,7 @@ public class CustomersController : Controller
                     _dbContext.SaveChanges();
                     if (User.Identity!.IsAuthenticated && !customer.CalledFromReservation.GetValueOrDefault())
                     {
-                        return View("AllCustomers", _dbContext.Customers.ToList());
+                        return GetAllCustomers();
                     }
                     return Ok(_dbContext.Customers.FirstOrDefault(x => x.Email == customer.Email));
                 }

@@ -16,7 +16,7 @@
 
                 <div class="form-group">
                     <label asp-for="Description" class="form-label">Descripción</label>
-                    <textarea id="Description" class="form-control" asp-for="Description"></textarea>
+                    <textarea id="editor" class="form-control" asp-for="Description"></textarea>
                 </div>
 
                 <div class="form-group">
@@ -133,14 +133,24 @@
 
 
 @section Scripts {
-    <script src="https://cdn.tiny.cloud/1/bxg4yyrv6hylk2q29qlwb3cs99roqgq1awpravf4t1re5edw/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-    <script>tinymce.init({
-            selector: 'textarea#Description',
-            height: 300,
-            language: 'es',
-            plugins: 'advlist autolink lists link image charmap print preview anchor image',
-            toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link image'
-        });
+    <script src="https://cdn.ckeditor.com/ckeditor5/38.1.1/classic/ckeditor.js"></script>
+    <script>ClassicEditor
+            .create(document.querySelector('#editor'), {
+                language: 'es',
+                toolbar: {
+                    items: ['undo', 'redo',
+                        '|', 'heading',
+                        '|', 'fontfamily', 'fontsize', 'fontColor', 'fontBackgroundColor',
+                        '|', 'bold', 'italic', 'strikethrough', 'subscript', 'superscript', 'code',
+                        '|', 'link', 'uploadImage', 'blockQuote', 'codeBlock',
+                        '|', 'alignment',
+                        '|', 'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent'],
+                    shouldNotGroupWhenFull: true
+                }
+            })
+            .catch(error => {
+                console.error(error);
+            });
         $(".form-check-input").change(function () {
             var dayValue = $(this).attr("id").split("_")[1];
             var scheduleSection = $("#schedule_" + dayValue);
@@ -199,7 +209,7 @@
         });
 
         $(document).on("click", "#confirmSave", function () {
-            $("form")[0].submit(); 
+            $("form")[0].submit();
         });
 
         $(document).on("click", "[data-dismiss='modal']", function () {

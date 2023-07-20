@@ -6,13 +6,13 @@
 <h2 class="font-weight-bold">Nueva Reserva</h2>
 
 <div class="container">
-    <form asp-action="SaveReservation" method="post">
+    <form asp-action="SaveReservation" method="post" class="needs-validation" novalidate>
         <div class="row">
             <div class="col-lg-4">
                 <div class="left-panel">
                     <div class="mt-5">
                         <div class="form-group">
-                            <select id="searchCustomer" class="selectpicker" data-live-search="true" data-show-subtext="true" asp-for="Customer.Id">
+                            <select id="searchCustomer" class="selectpicker" data-live-search="true" data-show-subtext="true" asp-for="Customer.Id" required>
                                 <option value="">Seleccione un cliente</option>
                                 @foreach (var customer in Model.CustomerOptions)
                                 {
@@ -39,7 +39,7 @@
                         <div class="row">
                             <div class="col-lg-6">
                                 <label class="font-weight-bold" for="Service_Id">Servicio</label>
-                                <select class="selectpicker" id="Service_Id" data-live-search="true" data-show-subtext="true" asp-for="Service.Id">
+                                <select class="selectpicker" id="Service_Id" data-live-search="true" data-show-subtext="true" asp-for="Service.Id" required>
                                     <option value="">Seleccione un servicio</option>
                                     @foreach (var service in Model.ServiceOptions)
                                     {
@@ -66,7 +66,7 @@
                                         </div>
                                     </div>
                                     <div class="col-12 mt-2">
-                                        <input class="form-control input-small" type="number" id="NumberDiners" name="NumberDiners" min="1" maxlength="2" asp-for="NumberDiners">
+                                        <input class="form-control input-small" type="number" id="NumberDiners" name="NumberDiners" min="1" maxlength="2" asp-for="NumberDiners" required>
                                     </div>
                                 </div>
                             </div>

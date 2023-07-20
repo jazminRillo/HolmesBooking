@@ -36,7 +36,7 @@
                     var culture = new CultureInfo("es-ES");
                     var formattedDate = $"{selectedDate.Day} de {culture.DateTimeFormat.GetMonthName(selectedDate.Month)} de {selectedDate.Year}";
                 }
-                <h2>Reservas - @formattedDate</h2>
+                <h2>Reservas - @formattedDate - Total personas: @Model.TotalNumberDiners</h2>
                 <div class="accordion accordion-flush" id="reservations">
                     @foreach (var reservation in Model.Reservations)
                     {

@@ -17,8 +17,115 @@
         .fc .fc-daygrid-day-number {
             cursor: pointer;
         }
+        .popper,
+        .tooltip {
+            position: absolute;
+            z-index: 9999;
+            background: black;
+            color: black;
+            width: 150px;
+            border-radius: 3px;
+            box-shadow: 0 0 2px rgba(0,0,0,0.5);
+            padding: 10px;
+            text-align: center;
+        }
+
+        .style5 .tooltip {
+            background: black;
+            color: #FFFFFF;
+            max-width: 200px;
+            width: auto;
+            font-size: .8rem;
+            padding: .5em 1em;
+        }
+
+        .popper .popper__arrow,
+        .tooltip .tooltip-arrow {
+            width: 0;
+            height: 0;
+            border-style: solid;
+            position: absolute;
+            margin: 5px;
+        }
+
+        .tooltip .tooltip-arrow,
+        .popper .popper__arrow {
+            border-color: black;
+        }
+
+        .style5 .tooltip .tooltip-arrow {
+            border-color: black;
+        }
+
+        .popper[x-placement^="top"],
+        .tooltip[x-placement^="top"] {
+            margin-bottom: 5px;
+        }
+
+            .popper[x-placement^="top"] .popper__arrow,
+            .tooltip[x-placement^="top"] .tooltip-arrow {
+                border-width: 5px 5px 0 5px;
+                border-left-color: transparent;
+                border-right-color: transparent;
+                border-bottom-color: transparent;
+                bottom: -5px;
+                left: calc(50% - 5px);
+                margin-top: 0;
+                margin-bottom: 0;
+            }
+
+        .popper[x-placement^="bottom"],
+        .tooltip[x-placement^="bottom"] {
+            margin-top: 5px;
+        }
+
+            .tooltip[x-placement^="bottom"] .tooltip-arrow,
+            .popper[x-placement^="bottom"] .popper__arrow {
+                border-width: 0 5px 5px 5px;
+                border-left-color: transparent;
+                border-right-color: transparent;
+                border-top-color: transparent;
+                top: -5px;
+                left: calc(50% - 5px);
+                margin-top: 0;
+                margin-bottom: 0;
+            }
+
+        .tooltip[x-placement^="right"],
+        .popper[x-placement^="right"] {
+            margin-left: 5px;
+        }
+
+            .popper[x-placement^="right"] .popper__arrow,
+            .tooltip[x-placement^="right"] .tooltip-arrow {
+                border-width: 5px 5px 5px 0;
+                border-left-color: transparent;
+                border-top-color: transparent;
+                border-bottom-color: transparent;
+                left: -5px;
+                top: calc(50% - 5px);
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+        .popper[x-placement^="left"],
+        .tooltip[x-placement^="left"] {
+            margin-right: 5px;
+        }
+
+            .popper[x-placement^="left"] .popper__arrow,
+            .tooltip[x-placement^="left"] .tooltip-arrow {
+                border-width: 5px 0 5px 5px;
+                border-top-color: transparent;
+                border-right-color: transparent;
+                border-bottom-color: transparent;
+                right: -5px;
+                top: calc(50% - 5px);
+                margin-left: 0;
+                margin-right: 0;
+            }
     </style>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js" integrity="sha512-TPh2Oxlg1zp+kz3nFA0C5vVC6leG/6mm1z9+mA81MI5eaUVqasPLO8Cuk4gMF4gUfP5etR73rgU/8PNMsSesoQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
     <script>document.addEventListener('DOMContentLoaded', function () {
             var calendarEl = document.getElementById('calendar');
@@ -26,21 +133,46 @@
                 initialView: 'dayGridMonth',
                 themeSystem: 'bootstrap',
                 locale: 'es',
-                editable: true,
+                editable: false,
+                expandRows: true,
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay, listWeek'
+                },
+                eventTimeFormat: {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
                 },
                 eventClick: function (info) {
                     var eventId = info.event.id;
                     window.location.href = '@Url.Action("edit-reservation", "Reservations")' + '/' + eventId;
                 },
                 dateClick: function (info) {
-                                var selectedDate = info.dateStr;
-                                window.location.href = '@Url.RouteUrl("FilteredReservations")' + '?selectedDate=' + selectedDate;
-                            }
-                        });
+                    var selectedDate = info.dateStr;
+                    window.location.href = '@Url.RouteUrl("FilteredReservations")' + '?selectedDate=' + selectedDate;
+                },
+                eventDidMount: function (info) {
+                    $(info.el).tooltip({
+                        title: info.event.extendedProps.description,
+                        placement: 'top',
+                        trigger: 'hover',
+                        container: 'body'
+                    });
+                    if (info.event.extendedProps.status === 5) {
+
+                        // Change background color of row
+                        info.el.style.backgroundColor = 'red';
+
+                        // Change color of dot marker
+                        var dotEl = info.el.getElementsByClassName('fc-event-dot')[0];
+                        if (dotEl) {
+                            dotEl.style.backgroundColor = 'white';
+                        }
+                    }
+                }
+            });
             calendar.render();
             $.ajax({
                 url: '@Url.RouteUrl("CalendarReservations")',
@@ -51,7 +183,11 @@
                             id: reservation.reservationId,
                             title: reservation.title,
                             start: reservation.start,
-                            end: reservation.end
+                            end: reservation.end,
+                            extendedProps: {
+                                status: reservation.status,
+                                description: reservation.description
+                            }
                         });
                     });
                 },

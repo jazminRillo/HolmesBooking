@@ -78,6 +78,21 @@ public class ServicesController : Controller
         }
     }
 
+    [EnableCors("_myAllowSpecificOrigins")]
+    [HttpGet("/all-active-services", Name = "GetAllActiveServices")]
+    public IActionResult GetAllActiveServices()
+    {
+        try
+        {
+            List<Service> services = _dbContext.Services.Where(x => x.IsActive && x.EndDate > DateTime.Today).ToList();
+            return Ok(services);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
     [HttpPost("/add-schedule", Name = "AddSchedule")]
     public IActionResult AddSchedule(int serviceId, [FromBody] Schedule schedule)
     {

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Net.NetworkInformation;
 using HolmesBooking.DataBase;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -167,9 +168,11 @@ public class ReservationsController : Controller
                                     .Select(x => new
                                     {
                                         reservationId = x.Id.GetValueOrDefault(),
-                                        title = x.Service!.Name + "-" + x.Customer!.Name + "-" + x.NumberDiners,
+                                        title = x.NumberDiners + " Personas",
                                         start = x.Time,
-                                        end = x.Time 
+                                        end = x.Time,
+                                        status = x.State,
+                                        description = x.Service!.Name + " a nombre de " + x.Customer!.Name + " " + x.Customer!.Lastname
                                     })
                                     .ToList();
 
@@ -210,8 +213,9 @@ public class ReservationsController : Controller
             Reservations = reservations,
             Services = _dbContext.Services.ToList(),
             SelectedServices = selectedServicesIds,
-            SelectedDate = selectedDate
-        };
+            SelectedDate = selectedDate,
+            TotalNumberDiners = reservations.Sum(reservation => reservation.NumberDiners).GetValueOrDefault()
+    };
         return View("AllReservations", model);
     }
 
