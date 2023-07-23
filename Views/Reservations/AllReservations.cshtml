@@ -1,4 +1,10 @@
 ﻿@using System.Globalization
+@{
+    ViewData["Title"] = "Reservas";
+    string icon = Model.IsOnline ? "bi bi-globe" : "bi bi-globe2";
+    string btnClass = Model.IsOnline ? "btn-success" : "btn-danger";
+    string btnOnline = Model.IsOnline ? "Online" : "Offline";
+}
 <div class="container">
     <div class="row">
         <div class="col-lg-4">
@@ -36,85 +42,90 @@
                     var culture = new CultureInfo("es-ES");
                     var formattedDate = $"{selectedDate.Day} de {culture.DateTimeFormat.GetMonthName(selectedDate.Month)} de {selectedDate.Year}";
                 }
-                <h2>Reservas - @formattedDate - Total personas: @Model.TotalNumberDiners</h2>
-                <div class="accordion accordion-flush" id="reservations">
-                    @foreach (var reservation in Model.Reservations)
-                    {
-                        var accordionId = $"accordion-{reservation.Id}";
-                        var collapseId = $"collapse-{reservation.Id}";
-                        var reservationTime = reservation.Time?.ToString("HH:mm");
-                        <div class="card">
-                            <h2 class="card-header d-flex justify-content-between" id="@accordionId">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
-                                    @reservationTime Hs - @reservation.Customer!.Name @reservation.Customer!.Lastname
-                                    <div class="ml-auto ms-2">
-                                        <span class="badge rounded-pill bg-dark">@reservation.NumberDiners P</span>
-                                    </div>
-                                    <div class="ml-auto ms-2">
-                                        @{
-                                            string badgeColor;
-                                            string stateText;
+                <div class="mt-3 mb-2">
+                    <h2>Reservas - @formattedDate - Total personas: @Model.TotalNumberDiners</h2>
+                    <button class="btn @btnClass btn-sm" onclick="toggleDateAvailability()">
+                        <i class="@icon"></i> @btnOnline
+                    </button>
+                </div>
+                    <div class="accordion accordion-flush" id="reservations">
+                        @foreach (var reservation in Model.Reservations)
+                        {
+                            var accordionId = $"accordion-{reservation.Id}";
+                            var collapseId = $"collapse-{reservation.Id}";
+                            var reservationTime = reservation.Time?.ToString("HH:mm");
+                            <div class="card">
+                                <h2 class="card-header d-flex justify-content-between" id="@accordionId">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
+                                        @reservationTime Hs - @reservation.Customer!.Name @reservation.Customer!.Lastname
+                                        <div class="ml-auto ms-2">
+                                            <span class="badge rounded-pill bg-dark">@reservation.NumberDiners P</span>
+                                        </div>
+                                        <div class="ml-auto ms-2">
+                                            @{
+                                                string badgeColor;
+                                                string stateText;
 
-                                            switch (reservation.State)
-                                            {
-                                                case State.CONFIRMADA:
-                                                    badgeColor = "success";
-                                                    stateText = "Confirmada";
-                                                    break;
-                                                case State.DEMORADA:
-                                                    badgeColor = "warning";
-                                                    stateText = "Demorada";
-                                                    break;
-                                                case State.CANCELADA:
-                                                    badgeColor = "danger";
-                                                    stateText = "Cancelada";
-                                                    break;
-                                                case State.SIN_CONFIRMAR:
-                                                    badgeColor = "info";
-                                                    stateText = "Sin Confirmar";
-                                                    break;
-                                                default:
-                                                    badgeColor = "secondary";
-                                                    stateText = "Desconocido";
-                                                    break;
+                                                switch (reservation.State)
+                                                {
+                                                    case State.CONFIRMADA:
+                                                        badgeColor = "success";
+                                                        stateText = "Confirmada";
+                                                        break;
+                                                    case State.DEMORADA:
+                                                        badgeColor = "warning";
+                                                        stateText = "Demorada";
+                                                        break;
+                                                    case State.CANCELADA:
+                                                        badgeColor = "secondary";
+                                                        stateText = "Cancelada";
+                                                        break;
+                                                    case State.NOSHOW:
+                                                        badgeColor = "danger";
+                                                        stateText = "No Show";
+                                                        break;
+                                                    default:
+                                                        badgeColor = "secondary";
+                                                        stateText = "Desconocido";
+                                                        break;
+                                                }
                                             }
-                                        }
 
-                                        <span class="badge rounded-pill bg-@badgeColor">@stateText</span>
-                                    </div>
-                                </button>
-                                <div class="ml-auto ms-2">
-                                    <div class="dropdown">
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-secondary dropdown-toggle dropdown-toggle-split" type="button" id="dropdownMenuButton-@(reservation.Id)" data-bs-toggle="dropdown" aria-expanded="false">
-                                                Estado
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-@(reservation.Id)">
-                                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeReservationState('@reservation.Id', 'CONFIRMADA')">Confirmada</a></li>
-                                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeReservationState('@reservation.Id', 'DEMORADA')">Demorada</a></li>
-                                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeReservationState('@reservation.Id', 'CANCELADA')">Cancelada</a></li>
-                                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeReservationState('@reservation.Id', 'SIN_CONFIRMAR')">Sin Confirmar</a></li>
-                                            </ul>
+                                            <span class="badge rounded-pill bg-@badgeColor">@stateText</span>
+                                        </div>
+                                    </button>
+                                    <div class="ml-auto ms-2">
+                                        <div class="dropdown">
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-secondary dropdown-toggle dropdown-toggle-split" type="button" id="dropdownMenuButton-@(reservation.Id)" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    Estado
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-@(reservation.Id)">
+                                                    <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeReservationState('@reservation.Id', 'CONFIRMADA')">Confirmada</a></li>
+                                                    <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeReservationState('@reservation.Id', 'DEMORADA')">Demorada</a></li>
+                                                    <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeReservationState('@reservation.Id', 'CANCELADA')">Cancelada</a></li>
+                                                    <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeReservationState('@reservation.Id', 'NOSHOW')">No Show</a></li>
+                                                </ul>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </h2>
-                            <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@accordionId" data-bs-parent="#reservations">
-                                <div class="card-body">
-                                    <p>Servicio: @reservation.Service!.Name</p>
-                                    <p>Email: @reservation.Customer!.Email</p>
-                                    <p>Tel: @reservation.Customer!.PhoneNumber</p>
-                                    <p>Menores: @reservation.NumberKids</p>
-                                    <p>Celíacos: @reservation.NumberCeliac</p>
-                                    <p>Nota: @reservation.Note</p>
-                                    <a href="@Url.Action("EditReservation", "Reservations", new { id = reservation.Id })" class="btn btn-primary">Editar</a>
+                                </h2>
+                                <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@accordionId" data-bs-parent="#reservations">
+                                    <div class="card-body">
+                                        <p>Servicio: @reservation.Service!.Name</p>
+                                        <p>Email: @reservation.Customer!.Email</p>
+                                        <p>Tel: @reservation.Customer!.PhoneNumber</p>
+                                        <p>Menores: @reservation.NumberKids</p>
+                                        <p>Celíacos: @reservation.NumberCeliac</p>
+                                        <p>Nota: @reservation.Note</p>
+                                        <a href="@Url.Action("EditReservation", "Reservations", new { id = reservation.Id })" class="btn btn-primary">Editar</a>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    }
+                        }
+                    </div>
                 </div>
             </div>
-        </div>
     </div>
 </div>
 
@@ -126,6 +137,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css" integrity="sha512-34s5cpvaNG3BknEWSuOncX28vz97bRI59UnVtEEpFX536A7BtZSJHsDyFoCl8S7Dt2TPzcrCEoHBGeM4SUBDBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker3.min.css" integrity="sha512-aQb0/doxDGrw/OC7drNaJQkIKFu6eSWnVMAwPN64p6sZKeJ4QCDYL42Rumw2ZtL8DB9f66q4CnLIUnAw28dEbg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script>
+        function toggleDateAvailability() {
+            var selectedDate = "@Model.SelectedDate";
+
+            $.ajax({
+                url: '/reservations/SetDateAvailableOnline',
+                type: 'POST',
+                data: { selectedDate: selectedDate },
+                success: function (data) {
+                    location.reload();
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                }
+            });
+        }
         function changeReservationState(reservationId, newState) {
                     $.ajax({
                         url: '/reservations/ChangeReservationState',

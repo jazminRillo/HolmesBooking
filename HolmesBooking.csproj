@@ -30,10 +30,12 @@
     <Folder Include="Views\Customers\" />
     <Folder Include="Views\Users\" />
     <Folder Include="Notifications\" />
+    <Folder Include="wwwroot\img\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Views\Home\EditServiceOld.cshtml" />
     <Content Remove="Views\Shared\RegisterUser.cshtml" />
+    <Content Remove="wwwroot\img\" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Views\Shared\Register.Usercshtml">

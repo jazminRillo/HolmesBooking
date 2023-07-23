@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HolmesBooking;
@@ -14,6 +13,8 @@ public class Service
     public bool IsActive { get; set; }
     public int? MaxPeople { get; set; }
     public string? Description { get; set; }
+    public string? ShortDescription { get; set; }
+    public string? ImageUrl { get; set; }
 
     [Column(TypeName = "json")]
     public Dictionary<int, List<TimeSpan>> Schedule { get; set; }

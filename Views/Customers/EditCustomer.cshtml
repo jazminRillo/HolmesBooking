@@ -1,48 +1,74 @@
 ﻿@model Customer
-
-<h2>Editar Cliente</h2>
-
-<form asp-action="SaveCustomer" method="post">
-    <input type="hidden" asp-for="Id" />
-
-    <div class="form-group">
-        <label asp-for="Name">Name</label>
-        <input class="form-control" asp-for="Name" required />
-        <span asp-validation-for="Name" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Lastname">Lastname</label>
-        <input class="form-control" asp-for="Lastname" required />
-        <span asp-validation-for="Lastname" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Email">Email</label>
-        <input class="form-control" asp-for="Email" type="email" required />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="PhoneNumber">Phone Number</label>
-        <input class="form-control" asp-for="PhoneNumber" required />
-        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Classification">Classification</label>
-        <select class="form-control" asp-for="Classification">
-            @foreach (var value in Enum.GetValues(typeof(Classification)))
-            {
-                <option value="@value" selected="@value.Equals(Model.Classification)">@value</option>
-            }
-        </select>
-    </div>
-
-    <button type="submit" class="mt-3 btn btn-primary active">Guardar Cambios</button>
-</form>
-
-@section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+@{
+    ViewData["Title"] = "Editar Cliente";
 }
+<h2 class="text-center">Editar Cliente</h2>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <form asp-action="SaveCustomer" method="post" class="row g-4 needs-validation" novalidate>
+                <div class="col-md-5">
+                    <label class="font-weight-bold" asp-for="Name">Name</label>
+                    <input class="form-control" asp-for="Name" required />
+                </div>
+                <div class="col-md-5">
+                    <label class="font-weight-bold" asp-for="Lastname">Apellido</label>
+                    <input class="form-control" asp-for="Lastname" required />
+                </div>
+                <div class="col-md-5">
+                    <label class="font-weight-bold" asp-for="Email">Email</label>
+                    <input class="form-control" asp-for="Email" type="email" required />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                    <div class="invalid-feedback">
+                        Por favor agregar un email válido.
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <label class="font-weight-bold" asp-for="Password">Contraseña</label>
+                    <input type="password" class="form-control" asp-for="Password" required />
+                </div>
+                <div class="col-md-5">
+                    <label class="font-weight-bold" asp-for="PhoneNumber">Teléfono</label>
+                    <input class="form-control" asp-for="PhoneNumber" required pattern="^\d{10}$" title="Por favor, ingrese un número de teléfono válido de 10 dígitos (sin espacios ni guiones)." />
+                    <div class="invalid-feedback">
+                        Por favor agregar un teléfono válido.
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="font-weight-bold" asp-for="Classification">Classification</label>
+                    <select class="form-control" asp-for="Classification">
+                        @foreach (var value in Enum.GetValues(typeof(Classification)))
+                        {
+                            <option value="@value">@value</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="mt-3 btn btn-primary active">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>(() => {
+            'use strict'
+
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            const forms = document.querySelectorAll('.needs-validation')
+
+            // Loop over them and prevent submission
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()</script>
+}
+

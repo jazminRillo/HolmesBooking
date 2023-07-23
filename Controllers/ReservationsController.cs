@@ -24,6 +24,20 @@ public class ReservationsController : Controller
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
+    [HttpGet("/days-offline", Name = "DaysOffline")]
+    public IActionResult DaysOffline()
+    {
+        try
+        {
+            return Ok(_dbContext.DatesNotAvailable.ToList());
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    [EnableCors("_myAllowSpecificOrigins")]
     [HttpPost("/save-reservation", Name = "SaveReservation")]
     public IActionResult SaveReservation([FromForm] Reservation reservation)
     {
@@ -50,7 +64,9 @@ public class ReservationsController : Controller
                     SendConfirmation(reservation);
                     if (!User.Identity!.IsAuthenticated)
                     {
-                        var message = "Nueva reserva para el dia: " + reservation.Time!.Value.ToLongDateString() + ", " + reservation.TimeSelected + " Hs. Para " + reservation.NumberDiners + " personas a nombre de: " + reservation.Customer!.Name;
+                        var culture = new CultureInfo("es-ES");
+                        var reservationDate = reservation.Time!.Value.ToString("D", culture);
+                        var message = "Nueva reserva para el dia: " + reservationDate + ", " + reservation.TimeSelected + " Hs. Para " + reservation.NumberDiners + " personas a nombre de: " + reservation.Customer!.Name;
                         TempData["NotificationMessage"] = message;
                         var recipientEmail = "holmesbrewery@gmail.com";
                         var subject = "Nueva Reserva";
@@ -131,7 +147,6 @@ public class ReservationsController : Controller
         _emailService.SendReservationConfirmationEmail(recipientEmail, subject, message);
     }
 
-    // This endpoint works but it is not updated when you post a new reservation.
     [EnableCors("_myAllowSpecificOrigins")]
     [HttpGet("/all-reservations", Name = "GetAllReservations")]
     public List<Reservation> GetAllReservations(DateTime? date)
@@ -208,13 +223,14 @@ public class ReservationsController : Controller
         {
             reservations = reservations.Where(r => selectedServicesIds.Contains(r.Service!.Id)).ToList();
         }
-        var model = new AllServicesViewModel
+        var model = new AllReservationsViewModel
         {
             Reservations = reservations,
             Services = _dbContext.Services.ToList(),
             SelectedServices = selectedServicesIds,
             SelectedDate = selectedDate,
-            TotalNumberDiners = reservations.Sum(reservation => reservation.NumberDiners).GetValueOrDefault()
+            TotalNumberDiners = reservations.Sum(reservation => reservation.NumberDiners).GetValueOrDefault(),
+            IsOnline = !_dbContext.DatesNotAvailable.Any(x => x.Date == selectedDate)
     };
         return View("AllReservations", model);
     }
@@ -317,6 +333,26 @@ public class ReservationsController : Controller
       return View("FullCalendar");
     }
 
+    [HttpPost("SetDateAvailableOnline", Name = "SetDateAvailableOnline")]
+    public IActionResult SetDateAvailableOnline([FromForm] DateTime selectedDate)
+    {
+        var datesNotAvailable = _dbContext.DatesNotAvailable;
+        var existingDate = datesNotAvailable.FirstOrDefault(d => d.Date == selectedDate);
+
+        if (existingDate != null)
+        {
+            _dbContext.DatesNotAvailable.Remove(existingDate);
+            _dbContext.SaveChanges();
+            return Ok("Fecha eliminada de la lista de no disponibles.");
+        }
+        else
+        {
+            _dbContext.DatesNotAvailable.Add(new DatesNotAvailable { Date = selectedDate });
+            _dbContext.SaveChanges();
+            return Ok("Fecha agregada a la lista de no disponibles.");
+        }
+    }
+
     [HttpPost("ChangeReservationState", Name = "ChangeReservationState")]
     public IActionResult ChangeReservationState([FromForm] ChangeReservationStateViewModel reservationToBeUpdated)
     {
@@ -355,11 +391,11 @@ public class ReservationsController : Controller
             case State.CONFIRMADA:
                 return "success";
             case State.CANCELADA:
-                return "danger";
+                return "secondary";
             case State.DEMORADA:
                 return "warning";
-            case State.SIN_CONFIRMAR:
-                return "info";
+            case State.NOSHOW:
+                return "danger";
             default:
                 return "info";
         }
@@ -376,8 +412,8 @@ public class ReservationsController : Controller
                 return "Cancelada";
             case State.DEMORADA:
                 return "Demorada";
-            case State.SIN_CONFIRMAR:
-                return "Sin confirmar";
+            case State.NOSHOW:
+                return "No Show";
             default:
                 return "Sin confirmar";
         }

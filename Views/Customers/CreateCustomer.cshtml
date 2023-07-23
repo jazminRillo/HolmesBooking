@@ -1,20 +1,22 @@
 ﻿@model Customer
-
+@{
+    ViewData["Title"] = "Nuevo Cliente";
+}
 <h2 class="text-center">Nuevo Cliente</h2>
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <form asp-action="SaveCustomer" method="post" class="row g-4 needs-validation" novalidate>
                 <div class="col-md-5">
-                    <label asp-for="Name">Name</label>
+                    <label class="font-weight-bold" asp-for="Name">Name</label>
                     <input class="form-control" asp-for="Name" required />
                 </div>
                 <div class="col-md-5">
-                    <label asp-for="Lastname">Apellido</label>
+                    <label class="font-weight-bold" asp-for="Lastname">Apellido</label>
                     <input class="form-control" asp-for="Lastname" required />
                 </div>
                 <div class="col-md-5">
-                    <label asp-for="Email">Email</label>
+                    <label class="font-weight-bold" asp-for="Email">Email</label>
                     <input class="form-control" asp-for="Email" type="email" required />
                     <span asp-validation-for="Email" class="text-danger"></span>
                     <div class="invalid-feedback">
@@ -22,18 +24,18 @@
                     </div>
                 </div>
                 <div class="col-md-5">
-                    <label asp-for="Password">Contraseña</label>
+                    <label class="font-weight-bold" asp-for="Password">Contraseña</label>
                     <input type="password" class="form-control" asp-for="Password" required />
                 </div>
                 <div class="col-md-5">
-                    <label asp-for="PhoneNumber">Teléfono</label>
+                    <label class="font-weight-bold" asp-for="PhoneNumber">Teléfono</label>
                     <input class="form-control" asp-for="PhoneNumber" required pattern="^\d{10}$" title="Por favor, ingrese un número de teléfono válido de 10 dígitos (sin espacios ni guiones)." />
                     <div class="invalid-feedback">
                         Por favor agregar un teléfono válido.
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <label asp-for="Classification">Classification</label>
+                    <label class="font-weight-bold" asp-for="Classification">Classification</label>
                     <select class="form-control" asp-for="Classification">
                         @foreach (var value in Enum.GetValues(typeof(Classification)))
                         {

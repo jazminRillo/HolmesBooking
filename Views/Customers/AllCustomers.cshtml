@@ -1,5 +1,6 @@
 ﻿@model AllCustomersViewModel
 @{
+    ViewData["Title"] = "Clientes";
     int currentPage = Model.Page ?? 1;
     int totalPages = Model.TotalPages.GetValueOrDefault();
 }
@@ -29,10 +30,10 @@
             <div class="right-panel">
                 <div class="accordion accordion-flush" id="customers">
                     @foreach (var customer in Model.Customers)
-                        {
-                            var statusCount = Model.ReservationsByState[customer.Id!.Value];
-                            var accordionId = $"accordion-{customer.Id}";
-                            var collapseId = $"collapse-{customer.Id}";
+                    {
+                        var statusCount = Model.ReservationsByState[customer.Id!.Value];
+                        var accordionId = $"accordion-{customer.Id}";
+                        var collapseId = $"collapse-{customer.Id}";
                         <div class="card">
                             <h2 class="card-header d-flex justify-content-between" id="@accordionId">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">

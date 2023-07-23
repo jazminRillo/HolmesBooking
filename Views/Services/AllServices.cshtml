@@ -1,5 +1,7 @@
 ﻿@using System.Globalization
-
+@{
+    ViewData["Title"] = "Servicios";
+}
 
 <div class="d-flex justify-content-between align-items-center">
     <h2>Servicios</h2>
@@ -27,12 +29,15 @@
                         }
                     </div>
                 </button>
-                
+
             </h2>
             <div id="@collapseId" class="collapse" aria-labelledby="@accordionId" data-bs-parent="#reservations">
                 <div class="card-body">
                     <div>
                         <div>
+                            <h4>Descripción corta:</h4>
+                            <p>@Html.Raw(service.ShortDescription)</p>
+                            <h4>Descripción completa:</h4>
                             <p>@Html.Raw(service.Description)</p>
                             <h4>Días disponibles:</h4>
                             @foreach (var day in service.Schedule)

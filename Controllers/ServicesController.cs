@@ -93,12 +93,6 @@ public class ServicesController : Controller
         }
     }
 
-    [HttpPost("/add-schedule", Name = "AddSchedule")]
-    public IActionResult AddSchedule(int serviceId, [FromBody] Schedule schedule)
-    {
-        return Ok();
-    }
-
     [HttpGet("edit-service/{id}", Name = "EditService")]
     [Authorize]
     public IActionResult EditService(Guid id)
@@ -148,6 +142,8 @@ public class ServicesController : Controller
                 existingService.MaxPeople = service.MaxPeople;
                 existingService.Schedule = service.Schedule;
                 existingService.Description = service.Description;
+                existingService.ShortDescription = service.ShortDescription;
+                existingService.ImageUrl = service.ImageUrl;
                 _dbContext.SaveChanges();
             }
 

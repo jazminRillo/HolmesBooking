@@ -194,7 +194,7 @@ public class CustomersController : Controller
                 var statusCount = customer.Reservations
                                     .Where(r => r.State != null)
                                     .GroupBy(r => r.State)
-                                    .ToDictionary(g => g.Key ?? State.SIN_CONFIRMAR, g => g.Count());
+                                    .ToDictionary(g => g.Key ?? State.CONFIRMADA, g => g.Count());
                                         reservationsByState[customer.Id!.Value] = statusCount;
             }
 
