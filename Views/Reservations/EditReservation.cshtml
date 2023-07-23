@@ -31,19 +31,32 @@
                 <div class="right-panel">
                     <div class="form-group">
                         <div class="row">
-                            <div class="col-lg-6">
-                                <label class="font-weight-bold" for="Service_Id">Servicio</label>
-                                <select class="selectpicker" id="Service_Id" data-live-search="true" data-show-subtext="true" asp-for="Service.Id">
-                                    <option value="">Seleccione un servicio</option>
-                                    @foreach (var service in Model.ServiceOptions)
-                                    {
-                                        <option value="@service.Id">@service.Name</option>
-                                    }
-                                </select>
+                            <div class="row">
+                                <div class="col-md-3 me-5">
+                                    <label class="font-weight-bold" for="Service_Id">Servicio</label>
+                                    <select class="selectpicker" id="Service_Id" data-live-search="true" data-show-subtext="true" asp-for="Service.Id">
+                                        <option value="">Seleccione un servicio</option>
+                                        @foreach (var service in Model.ServiceOptions)
+                                        {
+                                            <option value="@service.Id">@service.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-3 ms-5">
+                                    <label class="font-weight-bold" asp-for="State">Estado de la reserva</label>
+                                    <select class="selectpicker" asp-for="State">
+                                        @foreach (var value in Enum.GetValues(typeof(State)))
+                                            {
+                                                var enumName = Enum.GetName(typeof(State), value);
+                                                var displayAttribute = ((Enum)value).GetDisplayName();
+                                                <option value="@value">@displayAttribute</option>
+                                            }
+                                    </select>
+                                </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="row">
-                                    <div class="col-12">
+                                    <div class="col-12 mt-3">
                                         <label class="font-weight-bold" for="NumberDiners">Cantidad de Personas</label>
                                     </div>
                                     <div class="col-12">

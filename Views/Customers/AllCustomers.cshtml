@@ -84,7 +84,6 @@
                                         <p>Email: @customer!.Email</p>
                                         <p>Tel: @customer!.PhoneNumber</p>
                                         <a href="@Url.Action("EditCustomer", "Customers", new { id = customer.Id })" class="btn btn-primary">Editar</a>
-                                        <a href="@Url.Action("DeleteCustomer", "Customers", new { id = customer.Id })" class="btn btn-danger">Eliminar</a>
                                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reservationHistoryModal-@customer!.Id">
                                             Historial de Reservas
                                         </button>
