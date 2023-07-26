@@ -1,0 +1,124 @@
+﻿@{
+    ViewData["Title"] = "Búsqueda";
+    var query = Model.query;
+}
+
+<div class="container mt-5">
+    <div class="input-group mb-3">
+        <input class="me-2" style="width:100%" placeholder="Buscar por nombre cliente, email, teléfono" aria-label="Search" id="fullSearchInput">
+    </div>
+    <ul class="nav nav-tabs" id="tabNav" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="clientesTab" data-toggle="tab" href="#clientes" role="tab" aria-controls="clientes" aria-selected="true">Clientes</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="reservasTab" data-toggle="tab" href="#reservas" role="tab" aria-controls="reservas" aria-selected="false">Reservas</a>
+        </li>
+    </ul>
+    <div class="tab-content" id="tabContent">
+        <div class="tab-pane fade show active" id="clientes" role="tabpanel" aria-labelledby="clientesTab">
+        </div>
+        <div class="tab-pane fade" id="reservas" role="tabpanel" aria-labelledby="reservasTab">
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>$("#fullSearchInput").on("input", function () {
+            var searchQuery = $(this).val();
+            performSearch(searchQuery);
+        });
+
+        $(document).ready(function () {
+            $("#tabNav a").click(function (e) {
+                e.preventDefault();
+                $(this).tab("show");
+            });
+            performSearch("@query");
+        });
+        function performSearch(searchQuery) {
+            $.ajax({
+                url: "/search-results",
+                method: "GET",
+                data: { search: searchQuery, showAll: true },
+                success: function (data) {
+                    if (data && data.customers.length > 0) {
+                        var customersHtml = "<div class=\"list-group\">";
+                        data.customers.forEach(function (customer) {
+                            customersHtml += `<a href="/customers/edit-customer/${customer.id}" class="list-group-item list-group-item-action" aria-current="true">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1"> ${customer.name} ${customer.lastname} </h5>`;
+                            if (customer.classification == 0) {
+                                customersHtml += `<small><span class="badge rounded-pill bg-info">
+                                                <i class="bi bi-award-fill"></i> Bronce
+                                            </span></small>`;
+                            }
+                            if (customer.classification == 1) {
+                                customersHtml += `<small><span class="badge rounded-pill bg-info">
+                                                <i class="bi bi-award-fill"></i> Plata
+                                            </span></small>`;
+                            }
+                            if (customer.classification == 2) {
+                                customersHtml += `<small><span class="badge rounded-pill bg-info">
+                                                <i class="bi bi-award-fill"></i> Oro
+                                            </span></small>`;
+                            }
+                            if (customer.classification == 3) {
+                                customersHtml += `<small><span class="badge rounded-pill bg-info">
+                                                <i class="bi bi-award-fill"></i> Platino
+                                            </span></small>`;
+                            }
+
+                            customersHtml += `</div>
+                                <p class="mb-1">${customer.email}</p>
+                                <p class="mb-1">${customer.phone}</p>
+                            `;
+
+                            var customerStates = data.reservationsByState[customer.id];
+
+                            if (customerStates) {
+                                customersHtml += `<div class="states-container">`;
+                                Object.entries(customerStates).forEach(function ([state, count]) {
+                                    customersHtml += `<span class="badge rounded-pill bg-dark">
+                                    <i class="bi bi-calendar-check"></i> ${state}: ${count}
+                                </span>`;
+                                });
+                                customersHtml += `</div>`;
+                            }
+                            customersHtml += `</a>`;
+                        });
+                        customersHtml += `</div>`;
+                        $("#clientes").html(customersHtml);
+                    } else {
+                        $("#clientes").html("<p>No se encontraron clientes.</p>");
+                    }
+
+                    if (data && data.reservations.length > 0) {
+                        var reservationsHtml = "<div class=\"list-group\">";
+                        data.reservations.forEach(function (reservation) {
+                            reservationsHtml += `<a href="/reservationw/edit-reservation/${reservation.id}" class="list-group-item list-group-item-action" aria-current="true">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1"> ${reservation.date} ${reservation.time}Hs</h5>
+                                    <small><span class="badge rounded-pill bg-info">
+                                                <i class="bi bi-calendar2-check-fill"></i> ${reservation.status}
+                                            </span></small>
+                                </div>
+                                <p class="mb-1">${reservation.customerName} ${reservation.customerLastName}</p>
+                                <p class="mb-1">${reservation.service}</p>
+                                <small>${reservation.people}</small>
+                            </a>`;
+                        });
+                        reservationsHtml += "</div>";
+                        $("#reservas").html(reservationsHtml);
+                    } else {
+                        $("#reservas").html("<p>No se encontraron reservas.</p>");
+                    }
+                },
+                error: function (error) {
+                    console.error("Error en la solicitud Ajax:", error);
+                }
+            });
+        }
+    </script>
+}
+

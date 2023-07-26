@@ -25,6 +25,7 @@
     <None Remove="Views\Customers\" />
     <None Remove="Views\Users\" />
     <None Remove="Notifications\" />
+    <None Remove="Views\Search\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Services\" />
@@ -32,11 +33,13 @@
     <Folder Include="Views\Users\" />
     <Folder Include="Notifications\" />
     <Folder Include="wwwroot\img\" />
+    <Folder Include="Views\Search\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Views\Home\EditServiceOld.cshtml" />
     <Content Remove="Views\Shared\RegisterUser.cshtml" />
     <Content Remove="wwwroot\img\" />
+    <Content Remove="Views\Search\Search.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Views\Shared\Register.Usercshtml">

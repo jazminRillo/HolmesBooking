@@ -56,6 +56,11 @@
                         </ul>
                         <ul class="navbar-nav flex-grow-2">
                             <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tooltip" data-bs-title="Buscar" id="openModalButton">
+                                    <i class="bi bi-search"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" id="notificationsToggle" data-bs-toggle="modal" data-bs-target="#notificationsModal">
                                     <i class="bi bi-bell-fill"></i>
                                 </a>
@@ -66,6 +71,7 @@
                                 </a>
                             </li>
                         </ul>
+
                     </div>
                 </div>
             </nav>
@@ -88,66 +94,165 @@
             </div>
         </div>
     </div>
-
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+    <div class="modal fade" id="searchResultsModal" role="dialog" tabindex="-1" aria-labelledby="searchResultsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <input class="me-2" style="width:100%" placeholder="Buscar por nombre cliente, email, teléfono" aria-label="Search" id="searchInput">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="showAll">Ver todos los resultados</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.9/signalr.min.js" integrity="sha512-YEeL0weWuxEVWFRE6/2jHIlU0muJ4CxAI9i/hite2/Nu5DKCU8PhDWL/n/VHHRHAbROS8ehhFRLkTe/1Q7O1Fw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const connection = new signalR.HubConnectionBuilder()
-                .withUrl("/notificationHub")
-                .build();
-
-            connection.on("UpdateLayout", function (notificationMessage) {
-                console.log("Se detectó un cambio en el backend. Mensaje recibido:", notificationMessage);
-                var notificationsIcon = document.getElementById('notificationsToggle');
-                notificationsIcon.classList.add('show-alert');
-
-                document.getElementById('notificationContent').textContent = notificationMessage;
-
-                var notificationsModal = new bootstrap.Modal(document.getElementById('notificationsModal'));
-                notificationsModal.show();
-                document.title = notificationMessage;
-                setTimeout(function () {
-                    if (Notification.permission === 'granted') {
-                        showNotification(notificationMessage);
-                    } else if (Notification.permission !== 'denied') {
-                        Notification.requestPermission(function (permission) {
-                            if (permission === 'granted') {
-                                showNotification(notificationMessage);
-                            }
-                        });
-                    }
-                }, 2000);
-            });
 
 
-            connection.start()
-                .then(function () {
-                    Notification.requestPermission();
-                })
-                .catch(function (err) {
-                    console.error("Error al establecer la conexión con el hub de notificaciones:", err);
+            <div class="container">
+                <main role="main" class="pb-3">
+                    @RenderBody()
+                </main>
+            </div>
+            <script src="~/lib/jquery/dist/jquery.min.js"></script>
+            <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="~/js/site.js" asp-append-version="true"></script>
+            @await RenderSectionAsync("Scripts", required: true)
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.9/signalr.min.js" integrity="sha512-YEeL0weWuxEVWFRE6/2jHIlU0muJ4CxAI9i/hite2/Nu5DKCU8PhDWL/n/VHHRHAbROS8ehhFRLkTe/1Q7O1Fw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            <script>
+                $("#openModalButton").on("click", function () {
+                    var searchResultsModal = new bootstrap.Modal(document.getElementById('searchResultsModal'));
+                    searchResultsModal.show();
                 });
-        });
-        function showNotification(message) {
-            var options = {
-                body: message,
-                tag: 'my-unique-id',
-                icon: 'notification_icon.png'
-            };
+                var searchTerm = "";
 
-            var notification = new Notification('Notificación', options);
-        }</script>
+                $("#searchInput").on("input", function () {
+                    searchTerm = $(this).val();
+                    updateSearchResults();
+                });
+                $("#showAll").on("click", function () {
+                    var searchQuery = $("#searchInput").val();
+                    var url = '/search?search=' + encodeURIComponent(searchQuery);
+                    window.location.href = url;
+                });
+                function updateSearchResults() {
+                    $.ajax({
+                        url: "/search-results",
+                        method: "GET",
+                        data: { search: searchTerm },
+                        success: function (data) {
+                            var modalBody = $("#searchResultsModal .modal-body");
+                            modalBody.empty();
+
+                            if (data && data.customers.length > 0) {
+                                modalBody.append("<h6 class='font-weight-bold'>Customers encontrados:</h6>");
+                                data.customers.forEach(function (customer) {
+                                    var customerHTML = `
+                                    <div class="container-fluid">
+                                      <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Nombre: ${customer.name} ${customer.lastname}</h6>
+                                                    <p class="card-text">Email: ${customer.email}</p>
+                                                    <p class="card-text">Telefono: ${customer.phone}</p>
+                                                    <a class="btn btn-primary" href='/customers/edit-customer/${customer.id}'>Ver Cliente</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    `;
+
+                                    modalBody.append(customerHTML);
+                                });
+                            } else {
+                                modalBody.append("<p>No se encontraron customers.</p>");
+                            }
+
+                            if (data && data.reservations.length > 0) {
+                                modalBody.append("<h6 class='font-weight-bold'>Reservas encontradas:</h6>");
+                                data.reservations.forEach(function (reservation) {
+                                    var reservationHTML = `
+                                    <div class="container-fluid">
+                                      <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Fecha: ${reservation.date} ${reservation.time} Hs</h6>
+                                                    <p class="card-text">Cliente: ${reservation.customerName} ${reservation.customerLastName}</p>
+                                                    <p class="card-text">Estado: ${reservation.status}</p>
+                                                    <a class="btn btn-primary" href='/reservations/edit-reservation/${reservation.id}'>Ver Reserva</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                      </div>
+                                     </div>
+                                    `;
+
+                                    modalBody.append(reservationHTML);
+                                });
+                            } else {
+                                modalBody.append("<p>No se encontraron reservas.</p>");
+                            }
+                        },
+                        error: function (error) {
+                            console.error("Error en la solicitud Ajax:", error);
+                        }
+                    });
+                }
+                document.addEventListener('DOMContentLoaded', function () {
+                    const connection = new signalR.HubConnectionBuilder()
+                        .withUrl("/notificationHub")
+                        .build();
+
+                    connection.on("UpdateLayout", function (notificationMessage) {
+                        console.log("Se detectó un cambio en el backend. Mensaje recibido:", notificationMessage);
+                        var notificationsIcon = document.getElementById('notificationsToggle');
+                        notificationsIcon.classList.add('show-alert');
+
+                        document.getElementById('notificationContent').textContent = notificationMessage;
+
+                        var notificationsModal = new bootstrap.Modal(document.getElementById('notificationsModal'));
+                        notificationsModal.show();
+                        document.title = notificationMessage;
+                        setTimeout(function () {
+                            if (Notification.permission === 'granted') {
+                                showNotification(notificationMessage);
+                            } else if (Notification.permission !== 'denied') {
+                                Notification.requestPermission(function (permission) {
+                                    if (permission === 'granted') {
+                                        showNotification(notificationMessage);
+                                    }
+                                });
+                            }
+                        }, 2000);
+                    });
 
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+                    connection.start()
+                        .then(function () {
+                            Notification.requestPermission();
+                        })
+                        .catch(function (err) {
+                            console.error("Error al establecer la conexión con el hub de notificaciones:", err);
+                        });
+                });
+                function showNotification(message) {
+                    var options = {
+                        body: message,
+                        tag: 'my-unique-id',
+                        icon: 'notification_icon.png'
+                    };
+
+                    var notification = new Notification('Notificación', options);
+                }</script>
 </body>
 </html>
 
