@@ -12,9 +12,9 @@
                 <div class="left-panel">
                     <div class="mt-5">
                         <div class="form-group">
-                            <select id="searchCustomer" class="selectpicker" data-live-search="true" data-show-subtext="true" asp-for="Customer.Id" required>
+                            <select id="searchCustomer" class="selectpicker" data-live-search="true" data-show-subtext="true" asp-for="Customer!.Id" required>
                                 <option value="">Seleccione un cliente</option>
-                                @foreach (var customer in Model.CustomerOptions)
+                                @foreach (var customer in Model.CustomerOptions!)
                                 {
                                     <option value="@customer.Id" data-subtext=@customer.Email>@customer.Name @customer.Lastname</option>
                                 }
@@ -39,9 +39,9 @@
                         <div class="row">
                             <div class="col-lg-6">
                                 <label class="font-weight-bold" for="Service_Id">Servicio</label>
-                                <select class="selectpicker" id="Service_Id" data-live-search="true" data-show-subtext="true" asp-for="Service.Id" required>
+                                <select class="selectpicker" id="Service_Id" data-live-search="true" data-show-subtext="true" asp-for="Service!.Id" required>
                                     <option value="">Seleccione un servicio</option>
-                                    @foreach (var service in Model.ServiceOptions)
+                                    @foreach (var service in Model.ServiceOptions!)
                                     {
                                         <option value="@service.Id">@service.Name</option>
                                     }

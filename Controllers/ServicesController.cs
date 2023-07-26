@@ -84,7 +84,10 @@ public class ServicesController : Controller
     {
         try
         {
-            List<Service> services = _dbContext.Services.Where(x => x.IsActive && x.EndDate > DateTime.Today).ToList();
+            List<Service> services = _dbContext.Services
+                .Where(x => x.IsActive
+                && x.AvailableOnline
+                && x.EndDate > DateTime.Today).ToList();
             return Ok(services);
         }
         catch (Exception)
@@ -144,6 +147,7 @@ public class ServicesController : Controller
                 existingService.Description = service.Description;
                 existingService.ShortDescription = service.ShortDescription;
                 existingService.ImageUrl = service.ImageUrl;
+                existingService.AvailableOnline = service.AvailableOnline;
                 _dbContext.SaveChanges();
             }
 

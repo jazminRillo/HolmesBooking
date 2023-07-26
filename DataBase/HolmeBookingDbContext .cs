@@ -26,7 +26,7 @@ namespace HolmesBooking.DataBase
                     .HasColumnType("jsonb")
                     .HasConversion(
                         schedule => JsonConvert.SerializeObject(schedule),
-                        json => JsonConvert.DeserializeObject<Dictionary<int, List<TimeSpan>>>(json)
+                        json => JsonConvert.DeserializeObject<Dictionary<int, List<TimeSpan>>>(json)!
                     );
             });
 

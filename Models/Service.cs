@@ -15,6 +15,7 @@ public class Service
     public string? Description { get; set; }
     public string? ShortDescription { get; set; }
     public string? ImageUrl { get; set; }
+    public bool AvailableOnline { get; set; }
 
     [Column(TypeName = "json")]
     public Dictionary<int, List<TimeSpan>> Schedule { get; set; }

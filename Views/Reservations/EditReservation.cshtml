@@ -10,7 +10,6 @@
 <div class="container mt-5">
     <form asp-action="SaveReservation" method="post">
         <input type="hidden" id="Id" asp-for="Id" />
-        <input type="hidden" id="State" asp-for="State" />
         <div class="row">
             <div class="col-lg-4">
                 <div class="left-panel">
@@ -18,8 +17,8 @@
                         <label class="font-weight-bold" for="Service_Id">Cliente</label>
                         <div id="customerDetails" class="card mt-3">
                             <div class="card-body">
-                                <input type="hidden" id="Customer.Id" asp-for="Customer.Id" />
-                                <h5 class="card-title" id="customerName">@Model.Customer.Name @Model.Customer.Lastname</h5>
+                                <input type="hidden" id="Customer.Id" asp-for="Customer!.Id" />
+                                <h5 class="card-title" id="customerName">@Model.Customer!.Name @Model.Customer.Lastname</h5>
                                 <p class="card-text" id="customerEmail">@Model.Customer.Email</p>
                                 <p class="card-text" id="customerPhoneNumber">@Model.Customer.PhoneNumber</p>
                             </div>
@@ -34,9 +33,9 @@
                             <div class="row">
                                 <div class="col-md-3 me-5">
                                     <label class="font-weight-bold" for="Service_Id">Servicio</label>
-                                    <select class="selectpicker" id="Service_Id" data-live-search="true" data-show-subtext="true" asp-for="Service.Id">
+                                    <select class="selectpicker" id="Service_Id" data-live-search="true" data-show-subtext="true" asp-for="Service!.Id">
                                         <option value="">Seleccione un servicio</option>
-                                        @foreach (var service in Model.ServiceOptions)
+                                        @foreach (var service in Model.ServiceOptions!)
                                         {
                                             <option value="@service.Id">@service.Name</option>
                                         }
@@ -44,7 +43,7 @@
                                 </div>
                                 <div class="col-md-3 ms-5">
                                     <label class="font-weight-bold" asp-for="State">Estado de la reserva</label>
-                                    <select class="selectpicker" asp-for="State">
+                                    <select class="selectpicker" asp-for="State" name="State">
                                         @foreach (var value in Enum.GetValues(typeof(State)))
                                             {
                                                 var enumName = Enum.GetName(typeof(State), value);

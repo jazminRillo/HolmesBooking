@@ -15,10 +15,10 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        if (!User.Identity.IsAuthenticated)
+        if (!User.Identity!.IsAuthenticated)
         {
-            string loginUrl = Url.Action("LoginUser", "Users", new { returnUrl = Url.Action("Index", "Home") });
-            return Redirect(loginUrl);
+            string loginUrl = Url.Action("LoginUser", "Users", new { returnUrl = Url.Action("Index", "Home") })!;
+            return Redirect(loginUrl!);
         }
 
         return RedirectToAction("FilteredReservations", "Reservations");

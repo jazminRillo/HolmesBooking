@@ -28,6 +28,16 @@
                             <span class="badge rounded-pill bg-danger">Inactivo</span>
                         }
                     </div>
+                    <div class="ml-auto ms-2">
+                        @if (service.AvailableOnline)
+                        {
+                            <span class="bi bi-globe badge rounded-pill bg-success"> Online</span>
+                        }
+                        else
+                        {
+                            <span class="bi bi-globe badge rounded-pill bg-danger"> Offline</span>
+                        }
+                    </div>
                 </button>
 
             </h2>

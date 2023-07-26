@@ -44,10 +44,21 @@
                     </div>
                 </div>
 
-                <div class="form-group d-flex align-items-center">
-                    <div class="form-check form-switch">
-                        <label asp-for="IsActive" class="font-weight-bold">Activo</label>
-                        <input type="checkbox" class="form-check-input" asp-for="IsActive" />
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <label asp-for="IsActive" class="font-weight-bold">Activo</label>
+                                <input type="checkbox" class="form-check-input" asp-for="IsActive" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <label asp-for="AvailableOnline" class="font-weight-bold">Disponible Online</label>
+                                <input type="checkbox" class="form-check-input" asp-for="AvailableOnline" />
+                            </div>
+                        </div>
                     </div>
                 </div>
 

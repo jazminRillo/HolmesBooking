@@ -1,7 +1,6 @@
 ﻿using HolmesBooking.DataBase;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -37,7 +36,7 @@ public class UsersController : Controller
             .FirstOrDefault(u => u.Username == login.Username);
 
         if (user == null ||
-            !VerifyPasswordHash(login.Password, user.PasswordHash, user.PasswordSalt))
+            !VerifyPasswordHash(login.Password!, user.PasswordHash!, user.PasswordSalt!))
         {
             return View("LoginUser", new LoginViewModel { CalledFromAdmin = true, Error = "Credenciales inválidas" });
         }
@@ -48,21 +47,21 @@ public class UsersController : Controller
             return Ok(customer);
         }
 
-        if (user.UserRoles!.FirstOrDefault(x => x.Role.Name == "Admin") == null)
+        if (user.UserRoles!.FirstOrDefault(x => x.Role!.Name == "Admin") == null)
         {
             return View("LoginUser", new LoginViewModel { CalledFromAdmin = true, Error = "El usuario no tiene permisos" });
         }
 
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, login.Username),
+            new Claim(ClaimTypes.Name, login.Username!),
         };
 
         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
-        string returnUrl = TempData["ReturnUrl"] as string;
+        string? returnUrl = TempData["ReturnUrl"] as string;
 
         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
         {
@@ -88,8 +87,7 @@ public class UsersController : Controller
             return View();
         }
 
-        byte[] passwordHash, passwordSalt;
-        CreatePasswordHash(user.Password, out passwordHash, out passwordSalt);
+        CreatePasswordHash(user.Password!, out byte[] passwordHash, out byte[] passwordSalt);
 
         var newUser = new User
         {

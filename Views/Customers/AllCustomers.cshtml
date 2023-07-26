@@ -29,9 +29,9 @@
         <div class="col-lg-8">
             <div class="right-panel">
                 <div class="accordion accordion-flush" id="customers">
-                    @foreach (var customer in Model.Customers)
+                    @foreach (var customer in Model.Customers!)
                     {
-                        var statusCount = Model.ReservationsByState[customer.Id!.Value];
+                        var statusCount = Model.ReservationsByState![customer.Id!.Value];
                         var accordionId = $"accordion-{customer.Id}";
                         var collapseId = $"collapse-{customer.Id}";
                         <div class="card">

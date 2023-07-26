@@ -1,4 +1,4 @@
-﻿using HolmesBooking;
+﻿using HolmesBooking.Controllers;
 using HolmesBooking.DataBase;
 using HolmesBooking.Notifications;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -8,14 +8,13 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-// Obtener la configuración de la aplicación
 var configuration = new ConfigurationBuilder()
     .SetBasePath(builder.Environment.ContentRootPath)
     .AddJsonFile("appsettings.json")
     .Build();
 
-// Agregar servicios a contenedor
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Sistema de Reservas API", Version = "v1" });
@@ -27,7 +26,7 @@ builder.Services.AddCors(options =>
                      policy =>
                      {
                          policy.WithOrigins(
-                             "http://holmessoftware-001-site2.atempurl.com",
+                             "https://client.holmesbooking.com",
                              "http://client.holmesbooking.com",
                              "http://localhost:3000")
                                .AllowAnyHeader()
@@ -37,7 +36,6 @@ builder.Services.AddCors(options =>
 
 string connectionString = configuration.GetConnectionString("DefaultConnection")!;
 
-// Configurar la conexión a la base de datos
 builder.Services.AddDbContext<HolmeBookingDbContext>(options =>
     options.UseSqlServer(connectionString));
 
@@ -52,17 +50,16 @@ builder.Services.AddAuthentication(options =>
     options.LoginPath = "/users";
 });
 
+builder.Services.AddSignalR();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 
 var app = builder.Build();
 
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -82,6 +79,7 @@ app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>
 {
+    endpoints.MapHub<NotificationHub>("/notificationHub");
     endpoints.MapControllerRoute(
         name: "services",
         pattern: "services/{action=Index}/{id?}",

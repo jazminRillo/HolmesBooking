@@ -1,9 +1,9 @@
 using System.Globalization;
-using System.Net.NetworkInformation;
 using HolmesBooking.DataBase;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace HolmesBooking.Controllers;
@@ -15,9 +15,11 @@ public class ReservationsController : Controller
     private readonly ILogger<ServicesController> _logger;
     private readonly HolmeBookingDbContext _dbContext;
     private readonly IEmailService _emailService;
+    private readonly IHubContext<NotificationHub> _hubContext;
 
-    public ReservationsController(ILogger<ServicesController> logger, HolmeBookingDbContext dbContext, IEmailService emailService)
+    public ReservationsController(IHubContext<NotificationHub> hubContext, ILogger<ServicesController> logger, HolmeBookingDbContext dbContext, IEmailService emailService)
     {
+        _hubContext = hubContext;
         _logger = logger;
         _dbContext = dbContext;
         _emailService = emailService;
@@ -67,10 +69,11 @@ public class ReservationsController : Controller
                         var culture = new CultureInfo("es-ES");
                         var reservationDate = reservation.Time!.Value.ToString("D", culture);
                         var message = "Nueva reserva para el dia: " + reservationDate + ", " + reservation.TimeSelected + " Hs. Para " + reservation.NumberDiners + " personas a nombre de: " + reservation.Customer!.Name;
-                        TempData["NotificationMessage"] = message;
-                        var recipientEmail = "holmesbrewery@gmail.com";
+                        var recipientEmail = "reservasholmes@gmail.com";
                         var subject = "Nueva Reserva";
+                        _hubContext.Clients.All.SendAsync("UpdateLayout", message);
                         _emailService.SendReservationConfirmationEmail(recipientEmail, subject, message);
+                        return Ok(reservation);
                     }
                     return FilteredReservations(null, null);
                 }
@@ -286,9 +289,9 @@ public class ReservationsController : Controller
         {
             Reservation reservation = _dbContext.Reservations.Find(reservationId)!;
             reservation.CustomerOptions = _dbContext.Customers.ToList();
-            reservation.ServiceOptions = _dbContext.Services.ToList();
-            reservation.Customer = _dbContext.Customers.Find(reservation.Customer.Id);
-            reservation.Service = _dbContext.Services.Find(reservation.Service.Id);
+            reservation.ServiceOptions = _dbContext.Services.Where(x => x.IsActive && x.EndDate > DateTime.Today).ToList();
+            reservation.Customer = _dbContext.Customers.Find(reservation.Customer!.Id);
+            reservation.Service = _dbContext.Services.Find(reservation.Service!.Id);
             reservation.TimeSelected = reservation.Time?.TimeOfDay;
             reservation.Time = reservation.Time?.Date;
             return reservation;
@@ -316,7 +319,7 @@ public class ReservationsController : Controller
     public IActionResult CreateReservation()
     {
         List<Customer> customers = _dbContext.Customers.ToList();
-        List<Service> services = _dbContext.Services.ToList();
+        List<Service> services = _dbContext.Services.Where(x => x.IsActive && x.EndDate > DateTime.Today).ToList();
 
         Reservation model = new Reservation
         {
