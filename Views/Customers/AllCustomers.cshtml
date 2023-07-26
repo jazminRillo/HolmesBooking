@@ -90,13 +90,12 @@
                                         <div class="modal fade" id="reservationHistoryModal-@customer!.Id" tabindex="-1" aria-labelledby="reservationHistoryModalLabel-@customer!.Id" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-scrollable">
                                                 <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5>Historial de Reservas</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
                                                     <div class="modal-body">
                                                         <div class="container-fluid">
-                                                            <div class="row">
-                                                                <div class="col">
-                                                                    <h5>Historial de Reservas</h5>
-                                                                </div>
-                                                            </div>
                                                             <div class="row">
                                                                 @foreach (var reservation in customer.Reservations!)
                                                                 {
