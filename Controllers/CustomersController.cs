@@ -122,8 +122,8 @@ public class CustomersController : Controller
                 {
                     existingCustomer.Name = customer.Name;
                     existingCustomer.Lastname = customer.Lastname;
-                    existingCustomer.Email = customer.Email;
                     existingCustomer.PhoneNumber = customer.PhoneNumber;
+                    existingCustomer.Password = customer.Password;
                     _dbContext.SaveChanges();
                 }
                 if (!User.Identity!.IsAuthenticated)
@@ -236,7 +236,13 @@ public class CustomersController : Controller
     {
         try
         {
-            return _dbContext.Customers.ToList().Find(x => x.Id == customerId)!;
+            var customer = _dbContext.Customers.ToList().Find(x => x.Id == customerId)!;
+            customer.Reservations = _dbContext.Reservations
+                    .Where(r => r.Customer!.Id == customer.Id)
+                    .OrderByDescending(r => r.Time)
+                    .Include(r => r.Service)
+                    .ToList();
+            return customer;
         }
         catch (Exception)
         {

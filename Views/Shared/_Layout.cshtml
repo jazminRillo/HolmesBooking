@@ -213,7 +213,6 @@
                         .build();
 
                     connection.on("UpdateLayout", function (notificationMessage) {
-                        console.log("Se detectó un cambio en el backend. Mensaje recibido:", notificationMessage);
                         var notificationsIcon = document.getElementById('notificationsToggle');
                         notificationsIcon.classList.add('show-alert');
 
@@ -247,7 +246,6 @@
                 function showNotification(message) {
                     var options = {
                         body: message,
-                        tag: 'my-unique-id',
                         icon: 'notification_icon.png'
                     };
 
