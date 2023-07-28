@@ -36,6 +36,7 @@ public class ServicesController : Controller
                 .Where(service => service.IsActive && date >= service.StartDate
                     && date <= service.EndDate
                     && service.Schedule != null
+                    && service.AvailableOnline
                     && service.Schedule.ContainsKey((int)date.DayOfWeek)
                     && date >= DateTime.Today)
                 .ToList();

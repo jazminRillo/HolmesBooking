@@ -61,6 +61,7 @@ public class ReservationsController : Controller
                     DateTime combinedDateTime = new(date.Year, date.Month, date.Day, time.Hours, time.Minutes, time.Seconds);
                     reservation.Time = combinedDateTime;
                     reservation.State = State.CONFIRMADA;
+                    reservation.CreatedDate = DateTime.Now.ToUniversalTime();
                     _dbContext.Reservations.Add(reservation);
                     _dbContext.SaveChanges();
                     SendConfirmation(reservation);
@@ -98,6 +99,7 @@ public class ReservationsController : Controller
                     existingReservation.State = reservation.State;
                     existingReservation.NumberKids = reservation.NumberKids;
                     existingReservation.NumberCeliac = reservation.NumberCeliac;
+                    existingReservation.Pets = reservation.Pets;
                     _dbContext.SaveChanges();
                     if (User.Identity!.IsAuthenticated)
                     {
@@ -115,7 +117,6 @@ public class ReservationsController : Controller
         catch (Exception)
         {
             throw;
-            // Handle error related with DB (?).
         }
     }
 
@@ -212,6 +213,15 @@ public class ReservationsController : Controller
                                     .OrderBy(x => x.Time)
                                     .Where(x => x.Customer!.Id == customerId)
                                     .ToList();
+        TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
+
+        foreach (var reservation in reservations)
+        {
+            if (reservation.CreatedDate!.Value.Kind == DateTimeKind.Utc)
+            {
+                reservation.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(reservation.CreatedDate.GetValueOrDefault(), localTimeZone);
+            }
+        }
         return Ok(reservations);
     }
 
@@ -225,6 +235,15 @@ public class ReservationsController : Controller
         if (selectedServicesIds.Count > 0)
         {
             reservations = reservations.Where(r => selectedServicesIds.Contains(r.Service!.Id)).ToList();
+        }
+        TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
+
+        foreach (var reservation in reservations)
+        {
+            if (reservation.CreatedDate!.Value.Kind == DateTimeKind.Utc)
+            {
+                reservation.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(reservation.CreatedDate.GetValueOrDefault(), localTimeZone);
+            }
         }
         var model = new AllReservationsViewModel
         {
@@ -294,6 +313,7 @@ public class ReservationsController : Controller
             reservation.Service = _dbContext.Services.Find(reservation.Service!.Id);
             reservation.TimeSelected = reservation.Time?.TimeOfDay;
             reservation.Time = reservation.Time?.Date;
+            reservation.CreatedDate = reservation.CreatedDate.GetValueOrDefault().ToLocalTime();
             return reservation;
         }
         catch (Exception)

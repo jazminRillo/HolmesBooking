@@ -45,11 +45,11 @@
                                     <label class="font-weight-bold" asp-for="State">Estado de la reserva</label>
                                     <select class="selectpicker" asp-for="State" name="State">
                                         @foreach (var value in Enum.GetValues(typeof(State)))
-                                            {
-                                                var enumName = Enum.GetName(typeof(State), value);
-                                                var displayAttribute = ((Enum)value).GetDisplayName();
-                                                <option value="@value">@displayAttribute</option>
-                                            }
+                                        {
+                                            var enumName = Enum.GetName(typeof(State), value);
+                                            var displayAttribute = ((Enum)value).GetDisplayName();
+                                            <option value="@value">@displayAttribute</option>
+                                        }
                                     </select>
                                 </div>
                             </div>
@@ -103,8 +103,20 @@
                     </div>
 
                     <div class="form-group">
+                        <div class="form-check form-switch">
+                            <label asp-for="Pets" class="font-weight-bold">Mascotas</label>
+                            <input type="checkbox" class="form-check-input" asp-for="Pets" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         <label class="font-weight-bold" asp-for="Note">Notas adicionales, alergias, etc</label>
                         <textarea class="form-control" asp-for="Note"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold" asp-for="CreatedDate">Fecha creación</label>
+                        <input class="form-control" type="datetime" asp-format="{0:dd/MM/yyyy HH:mm:ss}" id="CreatedDate" name="CreatedDate" asp-for="CreatedDate" readonly>
                     </div>
 
                     <button type="submit" class="btn btn-primary active">Guardar</button>

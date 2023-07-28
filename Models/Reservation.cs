@@ -14,6 +14,8 @@ public class Reservation
     public string? Note { get; set; }
     public int? NumberKids { get; set; }
     public int? NumberCeliac { get; set; }
+    public DateTime? CreatedDate { get; set; }
+    public bool Pets { get; set; }
     [NotMapped]
     public TimeSpan? TimeSelected { get; set; }
     [NotMapped]
@@ -23,22 +25,6 @@ public class Reservation
 
     public Reservation()
     {
-    }
-
-    public Reservation(Guid? Id, Customer Customer, Service Service, DateTime Time, State State, int NumberDiners, string Note)
-    {
-        this.Id = Id;
-        this.Customer = Customer;
-        this.Service = Service;
-        this.Time = Time;
-        this.State = State;
-        this.NumberDiners = NumberDiners;
-        this.Note = Note;
-    }
-
-    public override string ToString()
-    {
-        return $"Id: {Id}, Customer: {Customer}, Service: {Service}, Time: {Time}, State: {State}, NumberDiners: {NumberDiners}, Note: {Note}";
-    }
+    } 
 
 }

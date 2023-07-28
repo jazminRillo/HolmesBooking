@@ -123,7 +123,7 @@
             <script src="~/lib/jquery/dist/jquery.min.js"></script>
             <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
             <script src="~/js/site.js" asp-append-version="true"></script>
-            @await RenderSectionAsync("Scripts", required: true)
+            @await RenderSectionAsync("Scripts", required: false)
             <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.9/signalr.min.js" integrity="sha512-YEeL0weWuxEVWFRE6/2jHIlU0muJ4CxAI9i/hite2/Nu5DKCU8PhDWL/n/VHHRHAbROS8ehhFRLkTe/1Q7O1Fw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
             <script>
                 $("#openModalButton").on("click", function () {
