@@ -1,10 +1,8 @@
-using System.ComponentModel.DataAnnotations;
-using System.Reflection;
-
 namespace HolmesBooking;
 
 public enum State
 {
+    PRESENTE,
     CONFIRMADA,
     DEMORADA,
     NOSHOW,
@@ -17,6 +15,8 @@ public static class EnumExtensions
     {
         switch (enumValue)
         {
+            case State.PRESENTE:
+                return "Ha llegado";
             case State.CONFIRMADA:
                 return "Confirmada";
             case State.CANCELADA:

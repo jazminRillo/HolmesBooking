@@ -51,11 +51,11 @@
                     <div class="accordion accordion-flush" id="reservations">
                         @foreach (var reservation in Model.Reservations)
                         {
-                            var accordionId = $"accordion-{reservation.Id}";
+                            var accordionId = $"accordion+{reservation.Id}";
                             var collapseId = $"collapse-{reservation.Id}";
                             var reservationTime = reservation.Time?.ToString("HH:mm");
                             <div class="card">
-                                <h2 class="card-header d-flex justify-content-between" id="@accordionId">
+                                <div class="card-header d-flex justify-content-between" id="@accordionId">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
                                         @reservationTime Hs - @reservation.Customer!.Name @reservation.Customer!.Lastname
                                         <div class="ml-auto ms-2">
@@ -68,6 +68,10 @@
 
                                                 switch (reservation.State)
                                                 {
+                                                    case State.PRESENTE:
+                                                        badgeColor = "primary";
+                                                        stateText = "Ha llegado";
+                                                        break;
                                                     case State.CONFIRMADA:
                                                         badgeColor = "success";
                                                         stateText = "Confirmada";
@@ -101,6 +105,7 @@
                                                     Estado
                                                 </button>
                                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-@(reservation.Id)">
+                                                    <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeReservationState('@reservation.Id', 'PRESENTE')">Ha llegado</a></li>
                                                     <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeReservationState('@reservation.Id', 'CONFIRMADA')">Confirmada</a></li>
                                                     <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeReservationState('@reservation.Id', 'DEMORADA')">Demorada</a></li>
                                                     <li><a class="dropdown-item" href="javascript:void(0)" onclick="changeReservationState('@reservation.Id', 'CANCELADA')">Cancelada</a></li>
@@ -109,7 +114,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </h2>
+                                </div>
                                 <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@accordionId" data-bs-parent="#reservations">
                                     <div class="card-body">
                                         <p>Servicio: @reservation.Service!.Name</p>
@@ -137,6 +142,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css" integrity="sha512-34s5cpvaNG3BknEWSuOncX28vz97bRI59UnVtEEpFX536A7BtZSJHsDyFoCl8S7Dt2TPzcrCEoHBGeM4SUBDBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker3.min.css" integrity="sha512-aQb0/doxDGrw/OC7drNaJQkIKFu6eSWnVMAwPN64p6sZKeJ4QCDYL42Rumw2ZtL8DB9f66q4CnLIUnAw28dEbg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script>
+        setInterval(function () {
+            $(".card").each(function () {
+                var reservationId = $(this).find(".card-header").attr("id").split('+')[1];
+                changeReservationState(reservationId, 'CHECKTIME');
+            });
+        }, 5 * 60 * 1000);
         function toggleDateAvailability() {
             var selectedDate = "@Model.SelectedDate";
 

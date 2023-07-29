@@ -381,18 +381,33 @@ public class ReservationsController : Controller
     {
         var reservation = _dbContext.Reservations.Find(reservationToBeUpdated.id);
 
-        if (reservation == null)
+        if (reservationToBeUpdated.newState == "CHECKTIME")
         {
-            return NotFound();
-        }
+            if (DateTime.Now.Subtract(reservation!.Time.GetValueOrDefault()) >= TimeSpan.FromMinutes(30))
+            {
+                reservation.State = State.DEMORADA;
+            }
+            else
+            {
+                var nochanges = new
+                {
+                    badgeColor = GetBadgeColor(reservation.State!.Value),
+                    stateText = GetStateText(reservation.State.Value)
+                };
 
-        if (Enum.TryParse(reservationToBeUpdated.newState, out State parsedState))
-        {
-            reservation.State = parsedState;
+                return Json(nochanges);
+            }
         }
         else
         {
-            return BadRequest("Estado de reserva inválido");
+            if (Enum.TryParse(reservationToBeUpdated.newState, out State parsedState))
+            {
+                reservation!.State = parsedState;
+            }
+            else
+            {
+                return BadRequest("Estado de reserva inválido");
+            }
         }
 
         _dbContext.Update(reservation);
@@ -409,36 +424,27 @@ public class ReservationsController : Controller
 
     private string GetBadgeColor(State state)
     {
-        switch (state)
+        return state switch
         {
-            case State.CONFIRMADA:
-                return "success";
-            case State.CANCELADA:
-                return "secondary";
-            case State.DEMORADA:
-                return "warning";
-            case State.NOSHOW:
-                return "danger";
-            default:
-                return "info";
-        }
-            
+            State.PRESENTE => "primary",
+            State.CONFIRMADA => "success",
+            State.CANCELADA => "secondary",
+            State.DEMORADA => "warning",
+            State.NOSHOW => "danger",
+            _ => "info",
+        };
     }
 
     private string GetStateText(State state)
     {
-        switch (state)
+        return state switch
         {
-            case State.CONFIRMADA:
-                return "Confirmada";
-            case State.CANCELADA:
-                return "Cancelada";
-            case State.DEMORADA:
-                return "Demorada";
-            case State.NOSHOW:
-                return "No Show";
-            default:
-                return "Sin confirmar";
-        }
+            State.PRESENTE => "Ha llegado",
+            State.CONFIRMADA => "Confirmada",
+            State.CANCELADA => "Cancelada",
+            State.DEMORADA => "Demorada",
+            State.NOSHOW => "No Show",
+            _ => "Sin confirmar",
+        };
     }
 }
