@@ -19,13 +19,15 @@ public class ReservationsController : Controller
     private readonly HolmeBookingDbContext _dbContext;
     private readonly IEmailService _emailService;
     private readonly IHubContext<NotificationHub> _hubContext;
+    private readonly IConfiguration _configuration;
 
-    public ReservationsController(IHubContext<NotificationHub> hubContext, ILogger<ServicesController> logger, HolmeBookingDbContext dbContext, IEmailService emailService)
+    public ReservationsController(IConfiguration configuration, IHubContext<NotificationHub> hubContext, ILogger<ServicesController> logger, HolmeBookingDbContext dbContext, IEmailService emailService)
     {
         _hubContext = hubContext;
         _logger = logger;
         _dbContext = dbContext;
         _emailService = emailService;
+        _configuration = configuration;
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
@@ -79,11 +81,11 @@ public class ReservationsController : Controller
                         _hubContext.Clients.All.SendAsync("UpdateLayout", message);
                         _emailService.SendReservationConfirmationEmail(recipientEmail, subject, message);
                         var accountSid = "ACc63085fc41002a8338df0209550437cb";
-                        var authToken = "4e7d6e989ed8cda9201dadaa1be9ff29";
+                        var authToken = _configuration.GetValue<string>("Twilio:Token");
                         TwilioClient.Init(accountSid, authToken);
 
                         var messageOptions = new CreateMessageOptions(
-                          new PhoneNumber("whatsapp:+5492616149893"));
+                          new PhoneNumber("whatsapp:+5492616149877"));
                         messageOptions.From = new PhoneNumber("whatsapp:+14155238886");
                         messageOptions.Body = message;
 
@@ -135,7 +137,7 @@ public class ReservationsController : Controller
         }
     }
 
-    private void SendConfirmation(Reservation reservation)
+    private async Task SendConfirmation(Reservation reservation)
     {
         var culture = new CultureInfo("es-ES");
         var reservationDate = reservation.Time!.Value.ToString("D", culture);
@@ -163,7 +165,7 @@ public class ReservationsController : Controller
                       $"</html>";
         var recipientEmail = reservation.Customer.Email!;
         var subject = "Confirmación Reserva en Holmes";
-        _emailService.SendReservationConfirmationEmail(recipientEmail, subject, message);
+        await _emailService.SendReservationConfirmationEmail(recipientEmail, subject, message);
     }
 
     [EnableCors("_myAllowSpecificOrigins")]

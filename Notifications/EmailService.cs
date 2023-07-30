@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using System.Net.Mail;
 using System.Net;
+using System.Threading.Tasks;
 
 public class EmailService : IEmailService
 {
@@ -12,7 +13,7 @@ public class EmailService : IEmailService
         _emailSettings = emailSettings.Value;
     }
 
-    public void SendReservationConfirmationEmail(string recipientEmail, string subject, string message)
+    public async Task SendReservationConfirmationEmail(string recipientEmail, string subject, string message)
     {
 
         var emailMessage = new MailMessage();
@@ -29,13 +30,13 @@ public class EmailService : IEmailService
         smtp.Credentials = Credentials;
         smtp.Port = _emailSettings.Port;
         smtp.EnableSsl = false;
-        smtp.Send(emailMessage);
+        await smtp.SendMailAsync(emailMessage);
     }
 }
 
 
 public interface IEmailService
 {
-    void SendReservationConfirmationEmail(string recipientEmail, string subject, string message);
+    Task SendReservationConfirmationEmail(string recipientEmail, string subject, string message);
 }
 

@@ -1,5 +1,4 @@
-﻿using HolmesBooking.Controllers;
-using HolmesBooking.DataBase;
+﻿using HolmesBooking.DataBase;
 using HolmesBooking.Notifications;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;

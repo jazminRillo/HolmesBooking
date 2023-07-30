@@ -15,11 +15,9 @@
     <PackageReference Include="Syncfusion.EJ.AspNet.Core" Version="20.4.0.44" />
     <PackageReference Include="Bootstrap.Datepicker" Version="1.8.0.1" />
     <PackageReference Include="Bootstrap.v3.Datetimepicker.CSS" Version="4.17.49" />
-    <PackageReference Include="TinyMCE" Version="6.5.1" />
     <PackageReference Include="Google.Apis.Auth" Version="1.61.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.20" />
     <PackageReference Include="Twilio" Version="6.10.1" />
-    <PackageReference Include="Twilio.AspNet.Core" Version="8.0.2" />
   </ItemGroup>
 
   <ItemGroup>
