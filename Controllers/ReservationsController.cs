@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.Types;
 
 namespace HolmesBooking.Controllers;
 
@@ -65,6 +68,7 @@ public class ReservationsController : Controller
                     _dbContext.Reservations.Add(reservation);
                     _dbContext.SaveChanges();
                     SendConfirmation(reservation);
+
                     if (!User.Identity!.IsAuthenticated)
                     {
                         var culture = new CultureInfo("es-ES");
@@ -74,6 +78,17 @@ public class ReservationsController : Controller
                         var subject = "Nueva Reserva";
                         _hubContext.Clients.All.SendAsync("UpdateLayout", message);
                         _emailService.SendReservationConfirmationEmail(recipientEmail, subject, message);
+                        var accountSid = "ACc63085fc41002a8338df0209550437cb";
+                        var authToken = "4e7d6e989ed8cda9201dadaa1be9ff29";
+                        TwilioClient.Init(accountSid, authToken);
+
+                        var messageOptions = new CreateMessageOptions(
+                          new PhoneNumber("whatsapp:+5492616149893"));
+                        messageOptions.From = new PhoneNumber("whatsapp:+14155238886");
+                        messageOptions.Body = message;
+
+
+                        var whatsapp = MessageResource.Create(messageOptions);
                         return Ok(reservation);
                     }
                     return FilteredReservations(null, null);
@@ -381,7 +396,7 @@ public class ReservationsController : Controller
     {
         var reservation = _dbContext.Reservations.Find(reservationToBeUpdated.id);
 
-        if (reservationToBeUpdated.newState == "CHECKTIME")
+        if (reservationToBeUpdated.newState == "CHECKTIME" && reservation!.State == State.CONFIRMADA)
         {
             if (DateTime.Now.Subtract(reservation!.Time.GetValueOrDefault()) >= TimeSpan.FromMinutes(30))
             {

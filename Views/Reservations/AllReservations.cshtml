@@ -51,7 +51,7 @@
                     <div class="accordion accordion-flush" id="reservations">
                         @foreach (var reservation in Model.Reservations)
                         {
-                            var accordionId = $"accordion+{reservation.Id}";
+                            var accordionId = $"accordion_{reservation.Id}";
                             var collapseId = $"collapse-{reservation.Id}";
                             var reservationTime = reservation.Time?.ToString("HH:mm");
                             <div class="card">
@@ -144,7 +144,7 @@
     <script>
         setInterval(function () {
             $(".card").each(function () {
-                var reservationId = $(this).find(".card-header").attr("id").split('+')[1];
+                var reservationId = $(this).find(".card-header").attr("id").split('_')[1];
                 changeReservationState(reservationId, 'CHECKTIME');
             });
         }, 5 * 60 * 1000);
@@ -169,7 +169,7 @@
                         type: 'POST',
                         data: { id: reservationId, newState: newState },
                         success: function (data) {
-                            var badge = $('#accordion-' + reservationId + ' .badge:eq(1)');
+                            var badge = $('#accordion_' + reservationId + ' .badge:eq(1)');
                             badge.removeClass().addClass('badge rounded-pill bg-' + data.badgeColor);
                             badge.text(data.stateText);
                         },
