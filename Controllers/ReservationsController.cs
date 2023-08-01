@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
 
@@ -80,16 +79,10 @@ public class ReservationsController : Controller
                         var subject = "Nueva Reserva";
                         _hubContext.Clients.All.SendAsync("UpdateLayout", message);
                         _emailService.SendReservationConfirmationEmail(recipientEmail, subject, message);
-                        var accountSid = "ACc63085fc41002a8338df0209550437cb";
-                        var authToken = _configuration.GetValue<string>("Twilio:Token");
-                        TwilioClient.Init(accountSid, authToken);
-
                         var messageOptions = new CreateMessageOptions(
                           new PhoneNumber("whatsapp:+5492616149877"));
                         messageOptions.From = new PhoneNumber("whatsapp:+14155238886");
                         messageOptions.Body = message;
-
-
                         var whatsapp = MessageResource.Create(messageOptions);
                         return Ok(reservation);
                     }
