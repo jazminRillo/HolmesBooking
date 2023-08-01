@@ -1,5 +1,6 @@
-﻿using HolmesBooking.DataBase;
-using HolmesBooking.Notifications;
+﻿using System.Net;
+using System.Net.Mail;
+using HolmesBooking.DataBase;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -11,7 +12,6 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var configuration = new ConfigurationBuilder()
     .SetBasePath(builder.Environment.ContentRootPath)
     .AddJsonFile("appsettings.json")
-    .AddUserSecrets<Program>()
     .Build();
 
 builder.Services.AddControllersWithViews();
@@ -53,12 +53,11 @@ builder.Services.AddAuthentication(options =>
 });
 
 var accountSid = "ACc63085fc41002a8338df0209550437cb";
-var authToken = configuration["Twilio:AuthToken"];
-TwilioClient.Init(accountSid, authToken);
+var authToken = Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN");
+if (authToken != null) { TwilioClient.Init(accountSid, authToken); }
 
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 
 var app = builder.Build();
 

@@ -89,7 +89,7 @@ public class CustomersController : Controller
                       $"<p>Si no olvidó su contraseña, o no solicitó iniciar este proceso, por favor ignore este correo electrónico.</p>" +
                       $"</body>" +
                       $"</html>";
-            _emailService.SendReservationConfirmationEmail(email, "¿Olvidó su contraseña? Elige una nueva contraseña para acceder a las reservas.", message);
+            _emailService.SendEmail(email, "¿Olvidó su contraseña? Elige una nueva contraseña para acceder a las reservas.", message);
             return Ok("Email Enviado");
         }
         catch (Exception)

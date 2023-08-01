@@ -1,19 +1,13 @@
-﻿using HolmesBooking.Notifications;
-using Microsoft.Extensions.Options;
-using System.Net.Mail;
+﻿
 using System.Net;
-using System.Threading.Tasks;
-
+using System.Net.Mail;
 public class EmailService : IEmailService
 {
-    private readonly EmailSettings _emailSettings;
-
-    public EmailService(IOptions<EmailSettings> emailSettings)
+    public EmailService()
     {
-        _emailSettings = emailSettings.Value;
     }
 
-    public async Task SendReservationConfirmationEmail(string recipientEmail, string subject, string message)
+    public async Task SendEmail(string recipientEmail, string subject, string message)
     {
 
         var emailMessage = new MailMessage();
@@ -23,20 +17,18 @@ public class EmailService : IEmailService
         emailMessage.Subject = subject;
         emailMessage.IsBodyHtml = true;
         emailMessage.Body = message;
-
-        SmtpClient smtp = new SmtpClient(_emailSettings.SmtpServer);
-        NetworkCredential Credentials = new NetworkCredential(_emailSettings.User, _emailSettings.Pass);
-        smtp.UseDefaultCredentials = false;
-        smtp.Credentials = Credentials;
-        smtp.Port = _emailSettings.Port;
-        smtp.EnableSsl = false;
-        await smtp.SendMailAsync(emailMessage);
+        var smtpClient = new SmtpClient("mail.holmesbooking.com");
+        smtpClient.Credentials = new NetworkCredential("reservas@holmesbooking.com", Environment.GetEnvironmentVariable("SmtpPass"));
+        smtpClient.UseDefaultCredentials = false;
+        smtpClient.Port = 8889;
+        smtpClient.EnableSsl = false;
+        await smtpClient.SendMailAsync(emailMessage);
     }
 }
 
 
 public interface IEmailService
 {
-    Task SendReservationConfirmationEmail(string recipientEmail, string subject, string message);
+    Task SendEmail(string recipientEmail, string subject, string message);
 }
 

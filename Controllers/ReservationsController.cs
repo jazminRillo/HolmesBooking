@@ -78,7 +78,7 @@ public class ReservationsController : Controller
                         var recipientEmail = "reservasholmes@gmail.com";
                         var subject = "Nueva Reserva";
                         _hubContext.Clients.All.SendAsync("UpdateLayout", message);
-                        _emailService.SendReservationConfirmationEmail(recipientEmail, subject, message);
+                        _emailService.SendEmail(recipientEmail, subject, message);
                         var messageOptions = new CreateMessageOptions(
                           new PhoneNumber("whatsapp:+5492616149877"));
                         messageOptions.From = new PhoneNumber("whatsapp:+14155238886");
@@ -159,7 +159,7 @@ public class ReservationsController : Controller
                       $"</html>";
         var recipientEmail = reservation.Customer.Email!;
         var subject = "Confirmación Reserva en Holmes";
-        await _emailService.SendReservationConfirmationEmail(recipientEmail, subject, message);
+        await _emailService.SendEmail(recipientEmail, subject, message);
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
