@@ -117,6 +117,7 @@ public class ReservationsController : Controller
                     existingReservation.NumberKids = reservation.NumberKids;
                     existingReservation.NumberCeliac = reservation.NumberCeliac;
                     existingReservation.Pets = reservation.Pets;
+                    reservation.CreatedDate = reservation.CreatedDate.GetValueOrDefault().ToUniversalTime();
                     _dbContext.SaveChanges();
                     if (User.Identity!.IsAuthenticated)
                     {

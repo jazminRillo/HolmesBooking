@@ -15,8 +15,11 @@ public class CustomersController : Controller
 {
     private readonly ILogger<CustomersController> _logger;
     private readonly HolmeBookingDbContext _dbContext;
-    public CustomersController(ILogger<CustomersController> logger, HolmeBookingDbContext dbContext)
+    private readonly IEmailService _emailService;
+
+    public CustomersController(IEmailService emailService, ILogger<CustomersController> logger, HolmeBookingDbContext dbContext)
     {
+        _emailService = emailService;
         _logger = logger;
         _dbContext = dbContext;
     }
@@ -62,6 +65,82 @@ public class CustomersController : Controller
             else
             {
                 return Ok(existingCustomer);
+            }
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    [EnableCors("_myAllowSpecificOrigins")]
+    [HttpPost("/forgot-password", Name = "ForgotPassword")]
+    public IActionResult ForgotPassword([FromForm] string email)
+    {
+        try
+        {
+            var existingCustomer = _dbContext.Customers.FirstOrDefault(x => x.Email == email);
+            var link = "https://holmesbooking.com/reset-password/" + existingCustomer!.Id;
+            var message = $"<html>" +
+                      $"<body>" +
+                      $"<h2>{existingCustomer!.Name} {existingCustomer.Lastname}</h2>" +
+                      $"<p>¿No recuerdas tu contraseña? Haciendo clic en el botón debajo lo dirigiremos a nuestro sitio web para crear una nueva contraseña.</p>" +
+                      $"<p><a href='{link}'>CREAR NUEVA CONTRASEÑA</a></p>" +
+                      $"<p>Si no olvidó su contraseña, o no solicitó iniciar este proceso, por favor ignore este correo electrónico.</p>" +
+                      $"</body>" +
+                      $"</html>";
+            _emailService.SendReservationConfirmationEmail(email, "¿Olvidó su contraseña? Elige una nueva contraseña para acceder a las reservas.", message);
+            return Ok("Email Enviado");
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    [EnableCors("_myAllowSpecificOrigins")]
+    [HttpGet("/reset-password/{id}", Name = "ResetPassword")]
+    public IActionResult ResetPasswrord(Guid id)
+    {
+        try
+        {
+            var existingCustomer = _dbContext.Customers.Find(id);
+            if (existingCustomer != null)
+            {
+                return View("ResetPassword", id);
+            }
+            else
+            {
+                return BadRequest("Cliente no encontrado");
+            }
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    [EnableCors("_myAllowSpecificOrigins")]
+    [HttpPost("/update-passwrord/{id}", Name = "UpdatePasswrord")]
+    public IActionResult UpdatePasswrord(Guid id, [FromForm] string password)
+    {
+        try
+        {
+            var existingCustomer = _dbContext.Customers.Find(id);
+            if (existingCustomer != null)
+            {
+                byte[] passwordHash, passwordSalt;
+                CreatePasswordHash(password, out passwordHash, out passwordSalt);
+                var existingUser = _dbContext.Users.FirstOrDefault(x => x.CustomerKey == existingCustomer!.Id);
+                existingUser!.PasswordHash = passwordHash;
+                existingUser.PasswordSalt = passwordSalt;
+                _dbContext.Users.Update(existingUser);
+                _dbContext.SaveChanges();
+                return Ok("");
+            }
+            else
+            {
+                return BadRequest("Cliente no encontrado");
             }
         }
         catch (Exception)
