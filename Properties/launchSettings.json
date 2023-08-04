@@ -13,7 +13,11 @@
       "launchBrowser": true,
       "applicationUrl": "https://localhost:7257;http://localhost:5127",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SECRET_KEY": "Wi3LlmVluwlZupSBhNamuYFv2qrKYYQzAAsg1rFFiizttczKBwls7OROj",
+        "SmtpPass": "Jonas1907@",
+        "TWILIO_AUTH_TOKEN": "a47cc80632a475e188d6cab91632a1ed",
+        "ApiKey": "oqwV2k+Wi3LlmVluwlZupSBhNamuYFv2qrKYYQzAAsg1rFFiizttczKBwls7OROj"
       },
       "dotnetRunMessages": true
     },

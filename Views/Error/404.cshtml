@@ -1,0 +1,41 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .image-container {
+        max-width: 800px;
+        max-height: 100%;
+        text-align: center;
+    }
+
+        .image-container img {
+            max-width: 50%;
+            max-height: 50%;
+        }
+</style>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 Not found - HolmesBooking</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/HolmesBooking.styles.css" asp-append-version="true" />
+</head>
+
+<body>
+    <div class="image-container">
+        <h1>Error 404 - Not found</h1>
+        <p>Lo sentimos, no encontramos esta página.</p>
+        <img src="img/404.jpg" alt="404" />
+    </div>
+</body>
+</html>

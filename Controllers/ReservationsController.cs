@@ -30,6 +30,7 @@ public class ReservationsController : Controller
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
+    [Authorize(AuthenticationSchemes = "JwtBearer")]
     [HttpGet("/days-offline", Name = "DaysOffline")]
     public IActionResult DaysOffline()
     {
@@ -44,8 +45,44 @@ public class ReservationsController : Controller
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
+    [Authorize(AuthenticationSchemes = "JwtBearer")]
     [HttpPost("/save-reservation", Name = "SaveReservation")]
     public IActionResult SaveReservation([FromForm] Reservation reservation)
+    {
+        var result = SaveReservations(reservation);
+        if (result != null && Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")! != "Development")
+        {
+            var culture = new CultureInfo("es-ES");
+            var reservationDate = reservation.Time!.Value.ToString("D", culture);
+            var message = "Nueva reserva para el dia: " + reservationDate + ", " + reservation.TimeSelected + " Hs. Para " + reservation.NumberDiners + " personas a nombre de: " + reservation.Customer!.Name;
+            var recipientEmail = "reservasholmes@gmail.com";
+            var subject = "Nueva Reserva";
+            _hubContext.Clients.All.SendAsync("UpdateLayout", message);
+            _emailService.SendEmail(recipientEmail, subject, message);
+            var messageOptions = new CreateMessageOptions(
+              new PhoneNumber("whatsapp:+5492616149877"));
+            messageOptions.From = new PhoneNumber("whatsapp:+14155238886");
+            messageOptions.Body = message;
+            var whatsapp = MessageResource.Create(messageOptions);
+            return Ok(reservation);
+        }
+        return BadRequest();
+
+    }
+
+    [HttpPost("/save-reservation-admin", Name = "SaveReservationAdmin")]
+    public IActionResult SaveReservationAdmin([FromForm] Reservation reservation)
+    {
+        var result = SaveReservations(reservation);
+        if (result != null)
+        {
+            return FilteredReservations(null, null);
+        }
+        return BadRequest();
+
+    }
+
+    private IActionResult SaveReservations(Reservation reservation)
     {
         try
         {
@@ -70,23 +107,7 @@ public class ReservationsController : Controller
                     _dbContext.SaveChanges();
                     SendConfirmation(reservation);
 
-                    if (!User.Identity!.IsAuthenticated)
-                    {
-                        var culture = new CultureInfo("es-ES");
-                        var reservationDate = reservation.Time!.Value.ToString("D", culture);
-                        var message = "Nueva reserva para el dia: " + reservationDate + ", " + reservation.TimeSelected + " Hs. Para " + reservation.NumberDiners + " personas a nombre de: " + reservation.Customer!.Name;
-                        var recipientEmail = "reservasholmes@gmail.com";
-                        var subject = "Nueva Reserva";
-                        _hubContext.Clients.All.SendAsync("UpdateLayout", message);
-                        _emailService.SendEmail(recipientEmail, subject, message);
-                        var messageOptions = new CreateMessageOptions(
-                          new PhoneNumber("whatsapp:+5492616149877"));
-                        messageOptions.From = new PhoneNumber("whatsapp:+14155238886");
-                        messageOptions.Body = message;
-                        var whatsapp = MessageResource.Create(messageOptions);
-                        return Ok(reservation);
-                    }
-                    return FilteredReservations(null, null);
+                    return Ok(reservation);
                 }
                 else
                 {
@@ -112,10 +133,7 @@ public class ReservationsController : Controller
                     existingReservation.Pets = reservation.Pets;
                     reservation.CreatedDate = reservation.CreatedDate.GetValueOrDefault().ToUniversalTime();
                     _dbContext.SaveChanges();
-                    if (User.Identity!.IsAuthenticated)
-                    {
-                        return FilteredReservations(null, null);
-                    }
+
                     return Ok(existingReservation);
                 }
                 else
@@ -142,8 +160,8 @@ public class ReservationsController : Controller
         var serviceName = reservation.Service!.Name;
         var serviceDescription = reservation.Service!.Description;
 
-        var editLink = "http://client.holmesbooking.com/";
-        var cancelLink = "https://holmesbooking.com/reservations/cancel-reservation/" + reservation.Id;
+        var editLink = _configuration["FrontUrl"];
+        var cancelLink = _configuration["AdminUrl"] + "/reservations/cancel-reservation/" + reservation.Id;
 
         var message = $"<html>" +
                       $"<body>" +

@@ -1,6 +1,8 @@
 ﻿using HolmesBooking.DataBase;
+using HolmesBooking.Utils;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +15,31 @@ using System.Text;
 public class UsersController : Controller
 {
     private readonly HolmeBookingDbContext _dbContext;
+    private readonly JwtHelper jwtHelper;
+    private readonly Dictionary<string, string> apiKeys = new Dictionary<string, string>
+    {
+        { Environment.GetEnvironmentVariable("ApiKey")!, "HolmesBrewery" },
+    };
 
     public UsersController(HolmeBookingDbContext dbContext)
     {
         _dbContext = dbContext;
+        jwtHelper = new JwtHelper(Environment.GetEnvironmentVariable("SECRET_KEY")!);
+    }
+
+    [EnableCors("_myAllowSpecificOrigins")]
+    [HttpPost("getToken", Name = "GetToken")]
+    public IActionResult GetToken([FromForm] ApiKeyRequestModel request)
+    {
+        if (apiKeys.TryGetValue(request.ApiKey, out var username))
+        {
+            var token = jwtHelper.GenerateToken(username);
+            return Ok(new { Token = token });
+        }
+        else
+        {
+            return Unauthorized();
+        }
     }
 
     [HttpGet]
@@ -27,8 +50,27 @@ public class UsersController : Controller
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
+    [Authorize(AuthenticationSchemes = "JwtBearer")]
     [HttpPost("login", Name = "Login")]
-    public async Task<IActionResult> Login([FromForm] LoginViewModel login)
+    public IActionResult Login([FromForm] LoginViewModel login)
+    {
+        var user = _dbContext.Users
+            .Include(u => u.UserRoles)!
+            .ThenInclude(ur => ur.Role)
+            .FirstOrDefault(u => u.Username == login.Username);
+
+        if (user == null ||
+            !VerifyPasswordHash(login.Password!, user.PasswordHash!, user.PasswordSalt!))
+        {
+            return Unauthorized();
+        }
+        var customer = _dbContext.Customers.Find(user.CustomerKey);
+        return Ok(customer);
+    }
+
+    [EnableCors("_myAllowSpecificOrigins")]
+    [HttpPost("login-admin", Name = "LoginAdmin")]
+    public async Task<IActionResult> LoginAdmin([FromForm] LoginViewModel login)
     {
         var user = _dbContext.Users
             .Include(u => u.UserRoles)!
@@ -39,12 +81,6 @@ public class UsersController : Controller
             !VerifyPasswordHash(login.Password!, user.PasswordHash!, user.PasswordSalt!))
         {
             return View("LoginUser", new LoginViewModel { CalledFromAdmin = true, Error = "Credenciales inválidas" });
-        }
-
-        if (!login.CalledFromAdmin.GetValueOrDefault())
-        {
-            var customer = _dbContext.Customers.Find(user.CustomerKey);
-            return Ok(customer);
         }
 
         if (user.UserRoles!.FirstOrDefault(x => x.Role!.Name == "Admin") == null)
@@ -69,6 +105,7 @@ public class UsersController : Controller
         }
         return RedirectToAction("Index", "Home");
     }
+
 
     [HttpGet("register-user", Name = "RegisterUser")]
     public IActionResult RegisterUser()
@@ -111,11 +148,9 @@ public class UsersController : Controller
 
     private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
     {
-        using (var hmac = new HMACSHA512())
-        {
-            passwordSalt = hmac.Key;
-            passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-        }
+        using var hmac = new HMACSHA512();
+        passwordSalt = hmac.Key;
+        passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
     }
 
     [HttpGet("/logout", Name = "Logout")]

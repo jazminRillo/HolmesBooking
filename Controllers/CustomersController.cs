@@ -32,6 +32,7 @@ public class CustomersController : Controller
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
+    [Authorize(AuthenticationSchemes = "JwtBearer")]
     [HttpPost("/external-login", Name = "ExternalLogin")]
     public IActionResult ExternalLogin([FromForm] Customer customer)
     {
@@ -74,6 +75,7 @@ public class CustomersController : Controller
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
+    [Authorize(AuthenticationSchemes = "JwtBearer")]
     [HttpPost("/forgot-password", Name = "ForgotPassword")]
     public IActionResult ForgotPassword([FromForm] string email)
     {
@@ -150,8 +152,20 @@ public class CustomersController : Controller
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
+    [Authorize(AuthenticationSchemes = "JwtBearer")]
     [HttpPost("/save-customer", Name = "SaveCustomer")]
     public IActionResult SaveCustomer([FromForm] Customer customer)
+    {
+        return SaveCustomers(customer);
+    }
+
+    [HttpPost("/save-customer-admin", Name = "SaveCustomerAdmin")]
+    public IActionResult SaveCustomerAdmin([FromForm] Customer customer)
+    {
+        return SaveCustomers(customer);
+    }
+
+    private IActionResult SaveCustomers(Customer customer)
     {
         try
         {
@@ -233,7 +247,6 @@ public class CustomersController : Controller
         catch (Exception)
         {
             throw;
-            // Handle error related with DB (?).
         }
     }
 

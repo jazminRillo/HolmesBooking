@@ -7,6 +7,9 @@
     <UserSecretsId>b0745515-fa56-4485-9aff-2a5e76c69fe7</UserSecretsId>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="bootstrap" Version="5.3.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.8" />
@@ -27,6 +30,8 @@
     <None Remove="Views\Users\" />
     <None Remove="Notifications\" />
     <None Remove="Views\Search\" />
+    <None Remove="Utils\" />
+    <None Remove="Views\Error\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Services\" />
@@ -35,12 +40,18 @@
     <Folder Include="Notifications\" />
     <Folder Include="wwwroot\img\" />
     <Folder Include="Views\Search\" />
+    <Folder Include="Utils\" />
+    <Folder Include="Views\Error\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Views\Home\EditServiceOld.cshtml" />
     <Content Remove="Views\Shared\RegisterUser.cshtml" />
     <Content Remove="wwwroot\img\" />
     <Content Remove="Views\Search\Search.cshtml" />
+    <Content Remove="wwwroot\img\401.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="wwwroot\img\401.jpg" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Views\Shared\Register.Usercshtml">

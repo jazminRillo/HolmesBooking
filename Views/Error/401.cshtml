@@ -1,0 +1,30 @@
+﻿@page
+@{
+    Layout = null;
+}
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .image-container {
+        max-width: 800px;
+        max-height: 100%;
+        text-align: center;
+    }
+
+        .image-container img {
+            max-width: 50%;
+            max-height: 50%;
+        }
+</style>
+<div class="image-container">
+    <h1>Error 401 - Unauthorized</h1>
+    <p>Lo sentimos, no tienes autorización para acceder a esta página.</p>
+    <img src="img/401.jpg" alt="401" />
+</div>
+

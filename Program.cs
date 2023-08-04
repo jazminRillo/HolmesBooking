@@ -1,8 +1,8 @@
-﻿using System.Net;
-using System.Net.Mail;
+﻿using System.Text;
 using HolmesBooking.DataBase;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Twilio;
 
@@ -12,6 +12,8 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var configuration = new ConfigurationBuilder()
     .SetBasePath(builder.Environment.ContentRootPath)
     .AddJsonFile("appsettings.json")
+    .AddJsonFile("appsettings.development.json", optional: true)
+    .AddJsonFile("appsettings.production.json", optional: true)
     .Build();
 
 builder.Services.AddControllersWithViews();
@@ -30,11 +32,16 @@ builder.Services.AddCors(options =>
                              "https://client.holmesbooking.com",
                              "http://client.holmesbooking.com",
                              "https://localhost:3000",
+                             "http://holmessoftware-001-site4.atempurl.com",
+                             "http://holmesbrewery.holmesbooking.com",
+                             "https://holmesbrewery.holmesbooking.com",
                              "http://localhost:3000")
                                .AllowAnyHeader()
                                .AllowAnyMethod();
                      });
 });
+
+string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
 
 string connectionString = configuration.GetConnectionString("DefaultConnection")!;
 
@@ -52,6 +59,20 @@ builder.Services.AddAuthentication(options =>
     options.LoginPath = "/users";
 });
 
+builder.Services.AddAuthentication("JwtBearer")
+        .AddJwtBearer("JwtBearer", options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidIssuer = "holmesbooking.com",
+                ValidAudience = "client.holmesbooking.com",
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SECRET_KEY")!))
+            };
+        });
+
 var accountSid = "ACc63085fc41002a8338df0209550437cb";
 var authToken = Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN");
 if (authToken != null) { TwilioClient.Init(accountSid, authToken); }
@@ -62,11 +83,9 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 var app = builder.Build();
 
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-}
+app.UseExceptionHandler("/Error/500"); // Redirige a la página de error para errores del servidor
+app.UseStatusCodePagesWithReExecute("/Error/{0}"); // Redirige a la página de error para otros códigos de estado
+app.UseHsts();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

@@ -21,6 +21,7 @@ public class ServicesController : Controller
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
+    [Authorize(AuthenticationSchemes = "JwtBearer")]
     [HttpGet("/available-services/{Date}", Name = "GetAvailableServicesByDate")]
     public List<Service>? GetAvailableServicesByDate(string Date)
     {
@@ -61,6 +62,7 @@ public class ServicesController : Controller
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
+    [Authorize]
     [HttpGet("/all-services", Name = "GetAllServices")]
     public IActionResult GetAllServices()
     {
@@ -80,6 +82,7 @@ public class ServicesController : Controller
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
+    [Authorize(AuthenticationSchemes = "JwtBearer")]
     [HttpGet("/all-active-services", Name = "GetAllActiveServices")]
     public IActionResult GetAllActiveServices()
     {
