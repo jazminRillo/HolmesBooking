@@ -73,7 +73,7 @@ builder.Services.AddAuthentication("JwtBearer")
             };
         });
 
-var accountSid = "ACc63085fc41002a8338df0209550437cb";
+var accountSid = Environment.GetEnvironmentVariable("TWILIO_ACC");
 var authToken = Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN");
 if (authToken != null) { TwilioClient.Init(accountSid, authToken); }
 
