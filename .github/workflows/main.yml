@@ -1,0 +1,70 @@
+name: Deploy to Production and Develop
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build-and-deploy-production:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    env:
+      REACT_APP_API_URL: https://holmesbooking.com
+      REACT_APP_API_KEY: oqwV2k+Wi3LlmVluwlZupSBhNamuYFv2qrKYYQzAAsg1rFFiizttczKBwls7OROj
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          dotnet-version: '6.x'
+
+      - name: Build the app
+        run: dotnet build --configuration Release
+
+      - name: Publish the app
+        run: dotnet publish --no-restore --configuration Release --output ./publish
+
+      - name: Deploy to hosting service by ftp
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: win5219.site4now.net
+          username: jero0578
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./publish/
+
+  build-and-deploy-development:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+
+    env:
+      REACT_APP_API_URL: http://holmessoftware-001-site2.atempurl.com
+      REACT_APP_API_KEY: oqwV2k+Wi3LlmVluwlZupSBhNamuYFv2qrKYYQzAAsg1rFFiizttczKBwls7OROj
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          dotnet-version: '6.x'
+
+      - name: Build the app
+        run: dotnet build --configuration Release
+
+      - name: Publish the app
+        run: dotnet publish --no-restore --configuration Release --output ./publish
+
+      - name: Deploy to hosting service by ftp
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: win5219.site4now.net
+          username: developadmin
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./publish/
