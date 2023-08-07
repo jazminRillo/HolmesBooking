@@ -10,11 +10,7 @@ jobs:
   build-and-deploy-production:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-
-    env:
-      REACT_APP_API_URL: https://holmesbooking.com
-      REACT_APP_API_KEY: oqwV2k+Wi3LlmVluwlZupSBhNamuYFv2qrKYYQzAAsg1rFFiizttczKBwls7OROj
-
+    
     steps:
       - name: Checkout the code
         uses: actions/checkout@v2
@@ -41,11 +37,7 @@ jobs:
   build-and-deploy-development:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/develop'
-
-    env:
-      REACT_APP_API_URL: http://holmessoftware-001-site2.atempurl.com
-      REACT_APP_API_KEY: oqwV2k+Wi3LlmVluwlZupSBhNamuYFv2qrKYYQzAAsg1rFFiizttczKBwls7OROj
-
+    
     steps:
       - name: Checkout the code
         uses: actions/checkout@v2
