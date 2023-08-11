@@ -68,7 +68,7 @@ public class ServicesController : Controller
     {
         try
         {
-            List<Service> services = _dbContext.Services.ToList();
+            List<Service> services = _dbContext.Services.OrderBy(x => x.Order).ToList();
             if (User.Identity!.IsAuthenticated)
             {
                 return View("AllServices", services);
@@ -91,7 +91,7 @@ public class ServicesController : Controller
             List<Service> services = _dbContext.Services
                 .Where(x => x.IsActive
                 && x.AvailableOnline
-                && x.EndDate > DateTime.Today).ToList();
+                && x.EndDate > DateTime.Today).OrderBy(x => x.Order).ToList();
             return Ok(services);
         }
         catch (Exception)
@@ -182,5 +182,19 @@ public class ServicesController : Controller
         }
 
         return View("CreateService", service);
+    }
+
+    [HttpGet("update-service-order/{serviceId}/{newPosition}", Name = "UpdateServiceOrder")]
+    [Authorize]
+    public IActionResult UpdateServiceOrder(Guid serviceId, int newPosition)
+    {
+        var service = _dbContext.Services.Find(serviceId);
+        if (service != null)
+        {
+            service.Order = newPosition;
+            _dbContext.SaveChanges();
+        }
+
+        return Ok();
     }
 }

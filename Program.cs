@@ -43,7 +43,8 @@ builder.Services.AddCors(options =>
 
 string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
 
-string connectionString = configuration.GetConnectionString("DefaultConnection")!;
+string connectionString = environment == "development" ? configuration.GetConnectionString("DevelopConnection")! :
+    configuration.GetConnectionString("DefaultConnection")!;
 
 builder.Services.AddDbContext<HolmeBookingDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -83,8 +84,8 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 var app = builder.Build();
 
 
-app.UseExceptionHandler("/Error/500"); // Redirige a la página de error para errores del servidor
-app.UseStatusCodePagesWithReExecute("/Error/{0}"); // Redirige a la página de error para otros códigos de estado
+app.UseExceptionHandler("/Error/500");
+app.UseStatusCodePagesWithReExecute("/Error/{0}");
 app.UseHsts();
 
 app.UseSwagger();

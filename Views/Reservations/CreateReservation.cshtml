@@ -224,7 +224,7 @@
                             todayHighlight: true,
                             language: "es",
                             beforeShowDay: function (date) {
-                                if (date < Date.now()) return false;
+                                if (date + 1 < Date.now()) return false;
                                 var dayOfWeek = date.getDay();
                                 return daysOfWeek.includes(dayOfWeek);
                             }
@@ -308,10 +308,17 @@
                     document.getElementById('customerEmail').textContent = data.email;
                     document.getElementById('customerPhoneNumber').textContent = data.phoneNumber;
                     $('#customerDetails').show();
-
                     var customerId = data.id;
-                    var mainModel = @Html.Raw(Json.Serialize(Model));
-                    mainModel.Customer = { Id: customerId };
+                    var customerName = data.name + ' ' + data.lastname;
+
+                    var newOption = document.createElement('option');
+                    newOption.value = customerId;
+                    newOption.text = customerName;
+
+                    var select = document.getElementById('searchCustomer');
+                    select.add(newOption);
+
+                    select.value = customerId;
                 })
                 .catch(error => {
                     console.error('Error al guardar el cliente:', error);

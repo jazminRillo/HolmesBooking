@@ -54,9 +54,22 @@ public class ReservationsController : Controller
         {
             var culture = new CultureInfo("es-ES");
             var reservationDate = reservation.Time!.Value.ToString("D", culture);
-            var message = "Nueva reserva para el dia: " + reservationDate + ", " + reservation.TimeSelected + " Hs. Para " + reservation.NumberDiners + " personas a nombre de: " + reservation.Customer!.Name;
-            var recipientEmail = "reservasholmes@gmail.com";
             var subject = "Nueva Reserva";
+            var message = "Nueva reserva para el dia: " + reservationDate + ", " + reservation.TimeSelected + " Hs. Para " + reservation.NumberDiners + " personas a nombre de: " + reservation.Customer!.Name;
+            if(reservation.Id != null)
+            {
+                if(reservation.State == State.CANCELADA)
+                {
+                    subject = "Cancelación Reserva";
+                    message = "Cancelación de reserva para el dia: " + reservationDate + ", " + reservation.TimeSelected + " Hs. Para " + reservation.NumberDiners + " personas a nombre de: " + reservation.Customer!.Name;
+                }
+                else
+                {
+                    subject = "Actualización Reserva";
+                    message = "Actualización de reserva para el dia: " + reservationDate + ", " + reservation.TimeSelected + " Hs. Para " + reservation.NumberDiners + " personas a nombre de: " + reservation.Customer!.Name;
+                }
+            }
+            var recipientEmail = "reservasholmes@gmail.com";
             _hubContext.Clients.All.SendAsync("UpdateLayout", message);
             _emailService.SendEmail(recipientEmail, subject, message);
             var messageOptions = new CreateMessageOptions(
@@ -66,7 +79,7 @@ public class ReservationsController : Controller
             var whatsapp = MessageResource.Create(messageOptions);
             return Ok(reservation);
         }
-        return BadRequest();
+        return Ok(reservation);
 
     }
 
@@ -133,7 +146,10 @@ public class ReservationsController : Controller
                     existingReservation.Pets = reservation.Pets;
                     reservation.CreatedDate = reservation.CreatedDate.GetValueOrDefault().ToUniversalTime();
                     _dbContext.SaveChanges();
-
+                    if(reservation.State == State.CANCELADA)
+                    {
+                        SendCancelConfirmation(existingReservation);
+                    }
                     return Ok(existingReservation);
                 }
                 else
@@ -177,6 +193,33 @@ public class ReservationsController : Controller
                       $"</html>";
         var recipientEmail = reservation.Customer.Email!;
         var subject = "Confirmación Reserva en Holmes";
+        await _emailService.SendEmail(recipientEmail, subject, message);
+    }
+
+    private async Task SendCancelConfirmation(Reservation reservation)
+    {
+        var culture = new CultureInfo("es-ES");
+        var reservationDate = reservation.Time!.Value.ToString("D", culture);
+        var reservationTime = reservation.TimeSelected;
+        var numberOfDiners = reservation.NumberDiners;
+        var customerName = reservation.Customer!.Name;
+        var customerLastName = reservation.Customer!.Lastname;
+        var serviceName = reservation.Service!.Name;
+
+        var editLink = _configuration["FrontUrl"];
+
+        var message = $"<html>" +
+                      $"<body>" +
+                      $"<h2>Confirmación de cancelación de su reserva en Holmes</h2>" +
+                      $"<p>Fecha de reserva: {reservationDate}, {reservationTime} Hs.</p>" +
+                      $"<p>Personas: {numberOfDiners}</p>" +
+                      $"<p>Nombre del cliente: {customerName} {customerLastName}</p>" +
+                      $"<p>Servicio seleccionado: {serviceName}</p>" +
+                      $"<p>Para realizar una nueva reserva puede ingresar a <a href='{editLink}'>Nueva Reserva</a></p>" +
+                      $"</body>" +
+                      $"</html>";
+        var recipientEmail = reservation.Customer.Email!;
+        var subject = "Cancelación Reserva en Holmes";
         await _emailService.SendEmail(recipientEmail, subject, message);
     }
 
@@ -232,7 +275,7 @@ public class ReservationsController : Controller
         }
     }
 
-
+    [EnableCors("_myAllowSpecificOrigins")]
     [HttpGet("customer-reservations/{customerId}", Name = "CustomerReservations")]
     public IActionResult CustomerReservations(Guid customerId)
     {

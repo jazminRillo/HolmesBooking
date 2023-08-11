@@ -16,12 +16,14 @@ public class CustomersController : Controller
     private readonly ILogger<CustomersController> _logger;
     private readonly HolmeBookingDbContext _dbContext;
     private readonly IEmailService _emailService;
+    private readonly IConfiguration _configuration;
 
-    public CustomersController(IEmailService emailService, ILogger<CustomersController> logger, HolmeBookingDbContext dbContext)
+    public CustomersController(IConfiguration configuration, IEmailService emailService, ILogger<CustomersController> logger, HolmeBookingDbContext dbContext)
     {
         _emailService = emailService;
         _logger = logger;
         _dbContext = dbContext;
+        _configuration = configuration;
     }
 
     [Authorize]
@@ -82,7 +84,7 @@ public class CustomersController : Controller
         try
         {
             var existingCustomer = _dbContext.Customers.FirstOrDefault(x => x.Email == email);
-            var link = "https://holmesbooking.com/reset-password/" + existingCustomer!.Id;
+            var link = _configuration["AdminUrl"] +"/reset-password/" + existingCustomer!.Id;
             var message = $"<html>" +
                       $"<body>" +
                       $"<h2>{existingCustomer!.Name} {existingCustomer.Lastname}</h2>" +
@@ -109,7 +111,8 @@ public class CustomersController : Controller
             var existingCustomer = _dbContext.Customers.Find(id);
             if (existingCustomer != null)
             {
-                return View("ResetPassword", id);
+                var model = new { id = id, url = _configuration["FrontUrl"]!.ToString() };
+                return View("ResetPassword", model);
             }
             else
             {
@@ -156,13 +159,19 @@ public class CustomersController : Controller
     [HttpPost("/save-customer", Name = "SaveCustomer")]
     public IActionResult SaveCustomer([FromForm] Customer customer)
     {
-        return SaveCustomers(customer);
+        SaveCustomers(customer);
+        return Ok(_dbContext.Customers.FirstOrDefault(x => x.Email == customer.Email));
     }
 
     [HttpPost("/save-customer-admin", Name = "SaveCustomerAdmin")]
     public IActionResult SaveCustomerAdmin([FromForm] Customer customer)
     {
-        return SaveCustomers(customer);
+        SaveCustomers(customer);
+        if (User.Identity!.IsAuthenticated && !customer.CalledFromReservation.GetValueOrDefault())
+        {
+            return GetAllCustomers();
+        }
+        return Ok(_dbContext.Customers.FirstOrDefault(x => x.Email == customer.Email));
     }
 
     private IActionResult SaveCustomers(Customer customer)
@@ -179,6 +188,10 @@ public class CustomersController : Controller
                 if (CustomerValidations.IsValid(_dbContext.Customers.ToList(), customer))
                 {
                     _dbContext.Customers.Add(customer);
+                    if(string.IsNullOrEmpty(customer.Password))
+                    {
+                        customer.Password = "1234";
+                    }
                     byte[] passwordHash, passwordSalt;
                     CreatePasswordHash(customer.Password!, out passwordHash, out passwordSalt);
                     var newUser = new User
@@ -223,25 +236,7 @@ public class CustomersController : Controller
                 {
                     return View("AllCustomers", _dbContext.Customers.ToList());
                 }
-                return Ok(customer);
-                //revisar
-                /*if (CustomerValidations.IsValid(_dbContext.Customers.ToList(), customer)) 
-                {
-                    var existingCustomer = _dbContext.Customers.Find(customer.Id);
-                    if (existingCustomer != null)
-                    {
-                        existingCustomer.Name = customer.Name;
-                        existingCustomer.Lastname = customer.Lastname;
-                        existingCustomer.Email = customer.Email;
-                        existingCustomer.PhoneNumber = customer.PhoneNumber;
-                        _dbContext.SaveChanges();
-                    }
-                    return Ok("Cliente con id " + customer.Id + " actualizado con éxito!");
-                }
-                else
-                {
-                    return BadRequest("La información proporcionada para actualizar al cliente contiene algún error.");
-                }*/
+                return Ok(existingCustomer);
             }
         }
         catch (Exception)

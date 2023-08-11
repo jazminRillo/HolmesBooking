@@ -44,7 +44,7 @@ public class CustomerValidations
             return false;
         }
 
-        if (!IsPhoneNumberValid(c.PhoneNumber!))
+        if (!string.IsNullOrEmpty(c.PhoneNumber) &&!IsPhoneNumberValid(c.PhoneNumber!))
         {
             return false;
         }
