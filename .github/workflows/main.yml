@@ -1,0 +1,67 @@
+name: Deploy to Production and Develop
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build-and-deploy-production:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Install dotnet
+        uses: actions/setup-node@v2
+        with:
+          dotnet-version: '6.x'
+
+      - name: Build the app
+        run: dotnet build --configuration Release
+
+      - name: Publish the app
+        run: dotnet publish --no-restore --configuration Release --output ./publish
+
+      - name: Upload from output to a remote server via FTP
+        uses: modern-dev/ftp-mirror@v2
+        with:
+          server: win5219.site4now.net
+          user: jero0578
+          password: ${{ secrets.FTP_PASSWORD }}
+          local_dir: "./publish"
+          delete: "true"
+          exlude: "data/ cache/"
+
+  build-and-deploy-development:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Install dotnet
+        uses: actions/setup-node@v2
+        with:
+          dotnet-version: '6.x'
+
+      - name: Build the app
+        run: dotnet build --configuration Release
+
+      - name: Publish the app
+        run: dotnet publish --no-restore --configuration Release --output ./publish
+
+      - name: Install lftp
+        run: sudo apt-get install lftp -y
+
+      - name: Deploy to hosting service by FTP
+        env:
+          FTP_HOST: win5219.site4now.net
+          FTP_USERNAME: developadmin
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          lftp -e "set ftp:ssl-allow no; open -u $FTP_USERNAME,$FTP_PASSWORD $FTP_HOST; mirror --reverse --only-newer --verbose ./publish/wwwroot/ /wwwroot/; bye"
