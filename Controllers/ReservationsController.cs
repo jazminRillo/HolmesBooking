@@ -14,16 +14,14 @@ namespace HolmesBooking.Controllers;
 [Route("reservations")]
 public class ReservationsController : Controller
 {
-    private readonly ILogger<ServicesController> _logger;
     private readonly HolmeBookingDbContext _dbContext;
     private readonly IEmailService _emailService;
     private readonly IHubContext<NotificationHub> _hubContext;
     private readonly IConfiguration _configuration;
 
-    public ReservationsController(IConfiguration configuration, IHubContext<NotificationHub> hubContext, ILogger<ServicesController> logger, HolmeBookingDbContext dbContext, IEmailService emailService)
+    public ReservationsController(IConfiguration configuration, IHubContext<NotificationHub> hubContext, HolmeBookingDbContext dbContext, IEmailService emailService)
     {
         _hubContext = hubContext;
-        _logger = logger;
         _dbContext = dbContext;
         _emailService = emailService;
         _configuration = configuration;
@@ -50,13 +48,14 @@ public class ReservationsController : Controller
     public IActionResult SaveReservation([FromForm] Reservation reservation)
     {
         var result = SaveReservations(reservation);
-        if (result != null && Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")! != "Development")
+        var isNewReservation = reservation.Id == null;
+        if (result != null && Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")! != "development")
         {
             var culture = new CultureInfo("es-ES");
             var reservationDate = reservation.Time!.Value.ToString("D", culture);
             var subject = "Nueva Reserva";
             var message = "Nueva reserva para el dia: " + reservationDate + ", " + reservation.TimeSelected + " Hs. Para " + reservation.NumberDiners + " personas a nombre de: " + reservation.Customer!.Name;
-            if(reservation.Id != null)
+            if(!isNewReservation)
             {
                 if(reservation.State == State.CANCELADA)
                 {
@@ -89,7 +88,7 @@ public class ReservationsController : Controller
         var result = SaveReservations(reservation);
         if (result != null)
         {
-            return FilteredReservations(null, null);
+            return FilteredReservations(null, reservation.Time);
         }
         return BadRequest();
 
@@ -118,7 +117,7 @@ public class ReservationsController : Controller
                     reservation.CreatedDate = DateTime.Now.ToUniversalTime();
                     _dbContext.Reservations.Add(reservation);
                     _dbContext.SaveChanges();
-                    SendConfirmation(reservation);
+                    _ = SendConfirmation(reservation);
 
                     return Ok(reservation);
                 }
@@ -144,12 +143,9 @@ public class ReservationsController : Controller
                     existingReservation.NumberKids = reservation.NumberKids;
                     existingReservation.NumberCeliac = reservation.NumberCeliac;
                     existingReservation.Pets = reservation.Pets;
-                    reservation.CreatedDate = reservation.CreatedDate.GetValueOrDefault().ToUniversalTime();
+                    existingReservation.CreatedDate = reservation.CreatedDate.GetValueOrDefault().ToUniversalTime();
                     _dbContext.SaveChanges();
-                    if(reservation.State == State.CANCELADA)
-                    {
-                        SendCancelConfirmation(existingReservation);
-                    }
+                    _ = SendCancelConfirmation(existingReservation);
                     return Ok(existingReservation);
                 }
                 else
@@ -206,11 +202,16 @@ public class ReservationsController : Controller
         var customerLastName = reservation.Customer!.Lastname;
         var serviceName = reservation.Service!.Name;
 
+        var title = "Confirmación de actualización de su reserva en Holmes";
+        if (reservation.State == State.CANCELADA)
+        {
+            title = "Confirmación de cancelación de su reserva en Holmes";
+        }
         var editLink = _configuration["FrontUrl"];
 
         var message = $"<html>" +
                       $"<body>" +
-                      $"<h2>Confirmación de cancelación de su reserva en Holmes</h2>" +
+                      $"<h2>{title}</h2>" +
                       $"<p>Fecha de reserva: {reservationDate}, {reservationTime} Hs.</p>" +
                       $"<p>Personas: {numberOfDiners}</p>" +
                       $"<p>Nombre del cliente: {customerName} {customerLastName}</p>" +
@@ -219,7 +220,11 @@ public class ReservationsController : Controller
                       $"</body>" +
                       $"</html>";
         var recipientEmail = reservation.Customer.Email!;
-        var subject = "Cancelación Reserva en Holmes";
+        var subject = "Actualización Reserva en Holmes";
+        if (reservation.State == State.CANCELADA)
+        {
+            subject = "Cancelación Reserva en Holmes";
+        }
         await _emailService.SendEmail(recipientEmail, subject, message);
     }
 
@@ -276,6 +281,7 @@ public class ReservationsController : Controller
     }
 
     [EnableCors("_myAllowSpecificOrigins")]
+    [Authorize(AuthenticationSchemes = "JwtBearer")]
     [HttpGet("customer-reservations/{customerId}", Name = "CustomerReservations")]
     public IActionResult CustomerReservations(Guid customerId)
     {
@@ -283,7 +289,7 @@ public class ReservationsController : Controller
                                     .Include(r => r.Customer)
                                     .Include(r => r.Service)
                                     .OrderBy(x => x.Time)
-                                    .Where(x => x.Customer!.Id == customerId)
+                                    .Where(x => x.Customer!.Id == customerId && x.Time > DateTime.Today)
                                     .ToList();
         TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
 
@@ -323,7 +329,7 @@ public class ReservationsController : Controller
             Services = _dbContext.Services.ToList(),
             SelectedServices = selectedServicesIds,
             SelectedDate = selectedDate,
-            TotalNumberDiners = reservations.Sum(reservation => reservation.NumberDiners).GetValueOrDefault(),
+            TotalNumberDiners = reservations.Where(x =>x.State != State.CANCELADA).Sum(reservation => reservation.NumberDiners).GetValueOrDefault(),
             IsOnline = !_dbContext.DatesNotAvailable.Any(x => x.Date == selectedDate)
     };
         return View("AllReservations", model);
@@ -356,6 +362,18 @@ public class ReservationsController : Controller
         reservation.Time = combinedDateTime;
         _dbContext.Update(reservation);
         _dbContext.SaveChanges();
+        var culture = new CultureInfo("es-ES");
+        var reservationDate = reservation.Time!.Value.ToString("D", culture);
+        var subject = "Cancelación Reserva";
+        var message = "Cancelación de reserva para el dia: " + reservationDate + ", " + reservation.TimeSelected + " Hs. Para " + reservation.NumberDiners + " personas a nombre de: " + reservation.Customer!.Name;
+        var recipientEmail = "reservasholmes@gmail.com";
+        _hubContext.Clients.All.SendAsync("UpdateLayout", message);
+        _emailService.SendEmail(recipientEmail, subject, message);
+        var messageOptions = new CreateMessageOptions(
+          new PhoneNumber("whatsapp:+5492616149877"));
+        messageOptions.From = new PhoneNumber("whatsapp:+14155238886");
+        messageOptions.Body = message;
+        var whatsapp = MessageResource.Create(messageOptions);
         return View("CancelReservation", reservation);
     }
 
@@ -472,22 +490,18 @@ public class ReservationsController : Controller
         }
         else
         {
-            if (Enum.TryParse(reservationToBeUpdated.newState, out State parsedState))
+            if (reservationToBeUpdated.newState != "CHECKTIME" && Enum.TryParse(reservationToBeUpdated.newState, out State parsedState))
             {
                 reservation!.State = parsedState;
             }
-            else
-            {
-                return BadRequest("Estado de reserva inválido");
-            }
         }
 
-        _dbContext.Update(reservation);
+        _dbContext.Update(reservation!);
         _dbContext.SaveChanges();
 
         var response = new
         {
-            badgeColor = GetBadgeColor(reservation.State.Value),
+            badgeColor = GetBadgeColor(reservation!.State!.Value),
             stateText = GetStateText(reservation.State.Value)
         };
 

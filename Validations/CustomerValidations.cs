@@ -34,11 +34,6 @@ public class CustomerValidations
             return false;
         }
 
-        if (customers.Any(x => x.Email!.Equals(c.Email)))
-        {
-            return false;
-        }
-
         if (!Regex.IsMatch(c.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
         {
             return false;

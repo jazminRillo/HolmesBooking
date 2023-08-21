@@ -12,12 +12,9 @@ public class ServicesController : Controller
 {
     private readonly HolmeBookingDbContext _dbContext;
 
-    private readonly ILogger<ServicesController> _logger;
-
-    public ServicesController(HolmeBookingDbContext dbContext, ILogger<ServicesController> logger)
+    public ServicesController(HolmeBookingDbContext dbContext)
     {
         _dbContext = dbContext;
-        _logger = logger;
     }
 
     [EnableCors("_myAllowSpecificOrigins")]

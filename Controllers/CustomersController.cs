@@ -13,15 +13,13 @@ namespace HolmesBooking.Controllers;
 [Route("customers")]
 public class CustomersController : Controller
 {
-    private readonly ILogger<CustomersController> _logger;
     private readonly HolmeBookingDbContext _dbContext;
     private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
 
-    public CustomersController(IConfiguration configuration, IEmailService emailService, ILogger<CustomersController> logger, HolmeBookingDbContext dbContext)
+    public CustomersController(IConfiguration configuration, IEmailService emailService, HolmeBookingDbContext dbContext)
     {
         _emailService = emailService;
-        _logger = logger;
         _dbContext = dbContext;
         _configuration = configuration;
     }
@@ -40,7 +38,7 @@ public class CustomersController : Controller
     {
         try
         {
-            var existingCustomer = _dbContext.Customers.FirstOrDefault(x => x.Email == customer.Email);
+            var existingCustomer = _dbContext.Customers.FirstOrDefault(x => x.Email!.ToLower() == customer.Email!.ToLower());
             if (existingCustomer == null)
             {
                 customer.Password = "google";
@@ -49,7 +47,7 @@ public class CustomersController : Controller
                 CreatePasswordHash(customer.Password!, out passwordHash, out passwordSalt);
                 var newUser = new User
                 {
-                    Username = customer.Email!,
+                    Username = customer.Email!.ToLower(),
                     PasswordHash = passwordHash,
                     PasswordSalt = passwordSalt,
                     CustomerKey = customer.Id
@@ -84,7 +82,7 @@ public class CustomersController : Controller
         try
         {
             var existingCustomer = _dbContext.Customers.FirstOrDefault(x => x.Email == email);
-            var link = _configuration["AdminUrl"] +"/reset-password/" + existingCustomer!.Id;
+            var link = _configuration["AdminUrl"] + "/reset-password/" + existingCustomer!.Id;
             var message = $"<html>" +
                       $"<body>" +
                       $"<h2>{existingCustomer!.Name} {existingCustomer.Lastname}</h2>" +
@@ -185,10 +183,15 @@ public class CustomersController : Controller
 
             if (CustomerValidations.IsNewCustomer(customer))
             {
+                if (_dbContext.Customers.FirstOrDefault(x => x.Email == customer.Email) != null)
+                {
+                    return BadRequest("Cliente con ese email ya registrado");
+                }
+
                 if (CustomerValidations.IsValid(_dbContext.Customers.ToList(), customer))
                 {
                     _dbContext.Customers.Add(customer);
-                    if(string.IsNullOrEmpty(customer.Password))
+                    if (string.IsNullOrEmpty(customer.Password))
                     {
                         customer.Password = "1234";
                     }
@@ -196,7 +199,7 @@ public class CustomersController : Controller
                     CreatePasswordHash(customer.Password!, out passwordHash, out passwordSalt);
                     var newUser = new User
                     {
-                        Username = customer.Email!,
+                        Username = customer.Email!.ToLower(),
                         PasswordHash = passwordHash,
                         PasswordSalt = passwordSalt,
                         CustomerKey = customer.Id
@@ -229,7 +232,22 @@ public class CustomersController : Controller
                     existingCustomer.Name = customer.Name;
                     existingCustomer.Lastname = customer.Lastname;
                     existingCustomer.PhoneNumber = customer.PhoneNumber;
-                    existingCustomer.Password = customer.Password;
+                    var existingUser = _dbContext.Users.FirstOrDefault(x => x.CustomerKey == existingCustomer!.Id);
+                    if (existingCustomer.Password != customer.Password)
+                    {
+                        byte[] passwordHash, passwordSalt;
+                        CreatePasswordHash(customer.Password!, out passwordHash, out passwordSalt);
+                        existingUser!.PasswordHash = passwordHash;
+                        existingUser.PasswordSalt = passwordSalt;
+                        _dbContext.Users.Update(existingUser);
+                    }
+                    if (existingCustomer.Email!.ToLower() != customer.Email!.ToLower())
+                    {
+                        existingUser!.Username = customer.Email!.ToLower();
+                        _dbContext.Users.Update(existingUser);
+                        existingCustomer.Email = customer.Email!.ToLower();
+                    }
+                    _dbContext.Customers.Update(existingCustomer);
                     _dbContext.SaveChanges();
                 }
                 if (!User.Identity!.IsAuthenticated)
@@ -248,7 +266,7 @@ public class CustomersController : Controller
     [EnableCors("_myAllowSpecificOrigins")]
     [HttpGet("/all-customers", Name = "GetAllCustomers")]
     [Authorize]
-    public IActionResult GetAllCustomers(int page = 1, int pageSize = 8, string? search = "")
+    public IActionResult GetAllCustomers(int page = 1, int pageSize = 8, [FromQuery] string? search = "")
     {
         try
         {

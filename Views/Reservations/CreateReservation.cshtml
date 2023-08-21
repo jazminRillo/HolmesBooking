@@ -126,27 +126,29 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="newCustomerForm">
+                <form id="newCustomerForm" class="row g-4 needs-validation" novalidate>
                     <input type="hidden" id="calledFromReservation" name="calledFromReservation" value="true" />
                     <div class="form-group">
-                        <label for="name">Nombre</label>
-                        <input type="text" class="form-control" id="name" name="name" required>
+                        <label class="font-weight-bold">Name</label>
+                        <input class="form-control" id="name" name="name" required />
                     </div>
                     <div class="form-group">
-                        <label for="lastname">Apellido</label>
-                        <input type="text" class="form-control" id="lastname" name="lastname" required>
+                        <label class="font-weight-bold">Apellido</label>
+                        <input class="form-control" id="lastname" name="lastname" required />
                     </div>
                     <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
+                        <label class="font-weight-bold">Email</label>
+                        <input class="form-control" id="email" name="email" type="email" />
+                        <div class="invalid-feedback">
+                            Por favor agregar un email válido.
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="phoneNumber">Número de teléfono</label>
-                        <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Contraseña</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                        <label class="font-weight-bold">Teléfono</label>
+                        <input class="form-control"  id="phoneNumber" name="phoneNumber" pattern="^\d{10}$" title="Por favor, ingrese un número de teléfono válido de 10 dígitos (sin espacios ni guiones)." />
+                        <div class="invalid-feedback">
+                            Por favor agregar un teléfono válido.
+                        </div>
                     </div>
                 </form>
             </div>
@@ -293,6 +295,11 @@
 
         function saveCustomerAdmin() {
             var form = document.getElementById('newCustomerForm');
+
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
             var formData = new FormData(form);
 
             fetch('/save-customer-admin', {

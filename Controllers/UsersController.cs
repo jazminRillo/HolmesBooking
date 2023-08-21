@@ -31,7 +31,7 @@ public class UsersController : Controller
     [HttpPost("getToken", Name = "GetToken")]
     public IActionResult GetToken([FromForm] ApiKeyRequestModel request)
     {
-        if (apiKeys.TryGetValue(request.ApiKey, out var username))
+        if (apiKeys.TryGetValue(request.ApiKey!, out var username))
         {
             var token = jwtHelper.GenerateToken(username);
             return Ok(new { Token = token });
@@ -106,7 +106,6 @@ public class UsersController : Controller
         return RedirectToAction("Index", "Home");
     }
 
-
     [HttpGet("register-user", Name = "RegisterUser")]
     public IActionResult RegisterUser()
     {
@@ -117,7 +116,7 @@ public class UsersController : Controller
     [HttpPost("/register", Name = "Register")]
     public IActionResult Register([FromForm] RegisterViewModel user)
     {
-        var existingUser = _dbContext.Users.FirstOrDefault(u => u.Username == user.Username);
+        var existingUser = _dbContext.Users.FirstOrDefault(u => u.Username!.ToUpper() == user.Username!.ToUpper());
         if (existingUser != null)
         {
             ModelState.AddModelError("", "El nombre de usuario ya está en uso");
